@@ -14,7 +14,7 @@ export default function NSM() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/server/api/completed");
+      const response = await fetch("/api/completed");
       if (!response.ok) throw new Error("Server error");
 
       const allRecords = await response.json();
@@ -33,7 +33,7 @@ export default function NSM() {
     if (!window.confirm("Approve this record as National Sales Manager (NSM)?\nIt will go to CM for final approval.")) return;
 
     try {
-      const res = await fetch("/api/server/api/approve", {
+      const res = await fetch("/api/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,7 +78,7 @@ export default function NSM() {
     if (!editingRecord) return;
 
     try {
-      const res = await fetch("/api/server/api/edit", {
+      const res = await fetch("/api/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

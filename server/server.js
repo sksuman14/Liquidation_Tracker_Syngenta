@@ -1,4 +1,4 @@
-// server.js → FINAL VERCEL + NEON + FULLY WORKING (DEC 2025)
+// server.js → FINAL VERSION USING record_date ONLY (DEC 2025)
 require("dotenv").config();
 const express = require("express");
 const { Pool } = require("pg");
@@ -8,7 +8,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Neon DB Connection (Vercel + Neon = Perfect)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
@@ -20,33 +19,36 @@ app.get("/api/completed", async (req, res) => {
     const result = await pool.query(`
       SELECT 
         phone_number, employee_name, hq, zone, area,
-        products, created_at, status, edited_by, edited_at, record_date, approved_by
+        products, created_at, status, edited_by, edited_at, record_date,
+        approved_by
       FROM complete_records 
       ORDER BY record_date DESC, created_at DESC
     `);
 
-    const rows = result.rows.map(row => ({
-      ...row,
-      products: row.products 
-        ? (typeof row.products === 'string' ? JSON.parse(row.products) : row.products)
-        : [],
-      status: row.status || "pending_ta",
-      approved_by: row.approved_by || [],
-      record_date: row.record_date 
-        ? row.record_date.toISOString().split('T')[0]  // Safe YYYY-MM-DD format
-        : null
-    }));
-
+   // In server.js → inside the map() function
+const rows = result.rows.map(row => ({
+  ...row,
+  products: row.products 
+    ? (typeof row.products === 'string' ? JSON.parse(row.products) : row.products)
+    : [],
+  status: row.status || "pending_ta",
+  approved_by: row.approved_by || [],
+  // THIS LINE FIXES IT
+ // Inside /api/completed → in the .map()
+record_date: row.record_date 
+  ? row.record_date.toLocaleDateString('en-CA')  // ← THIS IS GOLD
+  : null
+}));
     res.json(rows);
   } catch (err) {
-    console.error("GET /api/completed error:", err);
-    res.status(500).json({ error: "Failed to fetch records", details: err.message });
+    console.error("GET error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
-// APPROVE ENDPOINT
+// APPROVE – USING record_date ONLY (PERFECT!)
 app.post("/api/approve", async (req, res) => {
-  const { phone_number, record_date, role, user } = req.body;
+  const { phone_number, record_date, role, user } = req.body;  // ← Fixed
 
   if (!["TA", "TSM", "AM", "ZM", "NSM", "CM"].includes(role)) {
     return res.status(400).json({ error: "Invalid role" });
@@ -55,7 +57,8 @@ app.post("/api/approve", async (req, res) => {
   try {
     const current = await pool.query(
       `SELECT status, approved_by FROM complete_records 
-       WHERE phone_number = $1 AND record_date = $2 LIMIT 1`,
+       WHERE phone_number = $1 AND record_date = $2
+       LIMIT 1`,
       [phone_number, record_date]
     );
 
@@ -128,13 +131,15 @@ app.post("/api/approve", async (req, res) => {
   }
 });
 
-// EDIT ENDPOINT
+// EDIT – USING record_date ONLY (PERFECT!)
 app.patch("/api/edit", async (req, res) => {
-  const { phone_number, record_date, role, username, ...updates } = req.body;
+  const { phone_number, record_date, role, username, ...updates } = req.body;  // ← Fixed
 
   try {
     const findRecord = await pool.query(
-      `SELECT status FROM complete_records WHERE phone_number = $1 AND record_date = $2 LIMIT 1`,
+      `SELECT status FROM complete_records 
+       WHERE phone_number = $1 AND record_date = $2
+       LIMIT 1`,
       [phone_number, record_date]
     );
 
@@ -143,6 +148,7 @@ app.patch("/api/edit", async (req, res) => {
     }
 
     const currentStatus = findRecord.rows[0].status;
+
     if (currentStatus === "fully_approved") {
       return res.status(400).json({ error: "Cannot edit fully approved records" });
     }
@@ -157,7 +163,10 @@ app.patch("/api/edit", async (req, res) => {
 
     const values = Object.keys(updates)
       .filter(k => allowed.includes(k))
-      .map(k => Array.isArray(updates[k]) ? JSON.stringify(updates[k]) : updates[k]);
+      .map(k => {
+        const val = updates[k];
+        return Array.isArray(val) ? JSON.stringify(val) : val;
+      });
 
     const query = `
       UPDATE complete_records 
@@ -187,10 +196,8 @@ app.patch("/api/edit", async (req, res) => {
   }
 });
 
-// CRITICAL FOR VERCEL SERVERLESS
-module.exports = app;
-
-// DO NOT USE app.listen() — VERCEL WILL CRASH IF YOU DO
-// DELETE THIS BLOCK:
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => { ... });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server RUNNING → http://localhost:${PORT}`);
+  console.log(`All Records → http://localhost:${PORT}/api/completed`);
+});
