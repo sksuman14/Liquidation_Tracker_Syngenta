@@ -14,7 +14,7 @@ export default function CM() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/server/completed");
+      const response = await fetch("/api/completed");
       if (!response.ok) throw new Error("Server error");
 
       const allRecords = await response.json();
@@ -35,7 +35,7 @@ export default function CM() {
     if (!window.confirm("FINAL APPROVAL: This record will be permanently finalized. Continue?")) return;
 
     try {
-      const res = await fetch("/api/server/approve", {
+      const res = await fetch("/api/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,7 +78,7 @@ export default function CM() {
     if (!editingRecord) return;
 
     try {
-      const res = await fetch("/api/server/edit", {
+      const res = await fetch("/api/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
