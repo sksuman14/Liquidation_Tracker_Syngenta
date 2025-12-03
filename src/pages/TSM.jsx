@@ -16,7 +16,7 @@ export default function TSM() {
     try {
       setLoading(true);
       setError("");
-      const response = await fetch("http://localhost:5000/api/completed");
+      const response = await fetch("/api/completed");
       if (!response.ok) throw new Error("Failed to fetch records");
 
       const result = await response.json();
@@ -35,7 +35,7 @@ export default function TSM() {
     if (!window.confirm("Approve this record as Territory Sales Manager (TSM)?")) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/approve", {
+      const res = await fetch("/api/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,7 +79,7 @@ export default function TSM() {
     if (!editingRecord) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/edit", {
+      const res = await fetch("/api/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

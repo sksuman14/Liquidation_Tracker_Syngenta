@@ -35,7 +35,7 @@ export default function ApprovalDashboard() {
 
   const fetchRecords = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/completed");
+      const res = await fetch("/api/completed");
       const data = await res.json();
       setRecords(data);
     } catch (err) {
@@ -55,7 +55,7 @@ export default function ApprovalDashboard() {
     if (!window.confirm(`Approve as ${currentRole}?`)) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/approve", {
+      const res = await fetch("/api/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -93,7 +93,7 @@ export default function ApprovalDashboard() {
     if (!editingRecord) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/edit", {
+      const res = await fetch("/api/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -193,15 +193,14 @@ export default function ApprovalDashboard() {
               <tbody>
                 {editForm.products.map((p, i) => (
                   <tr key={i}>
-                   
+                    <td><input value={p.sku || ""} onChange={(e) => {
+                      const newProducts = [...editForm.products];
+                      newProducts[i].sku = e.target.value;
+                      setEditForm({...editForm, products: newProducts});
+                    }} style={{ width: "100%", padding: 8 }} /></td>
                     <td><input value={p.productName || ""} onChange={(e) => {
                       const newProducts = [...editForm.products];
                       newProducts[i].productName = e.target.value;
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ width: "100%", padding: 8 }} /></td>
-                     <td><input value={p.sku || ""} onChange={(e) => {
-                      const newProducts = [...editForm.products];
-                      newProducts[i].sku = e.target.value;
                       setEditForm({...editForm, products: newProducts});
                     }} style={{ width: "100%", padding: 8 }} /></td>
                     <td><input type="number" value={p.openingStock || 0} onChange={(e) => {
