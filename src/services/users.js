@@ -1,0 +1,53 @@
+export const users = [
+  { name: "Rokkam Suresh Reddy", email: "Suresh_Reddy.Rokkam@syngenta.com", mobile: "7997290290", role: "ZM" },
+  { name: "NAGARAJ T", email: "nagaraja.thippeswamy@syngenta.com", mobile: "8553771827", role: "ZM" },
+  { name: "Mr. Sambhaji Vaijnathrao Munde", email: "Sambhaji_Vaijnathrao.Munde@syngenta.com", mobile: "8888890178", role: "ZM" },
+
+  { name: "Vallapu Sateesh", email: "sateesh.vallapu@syngenta.com", mobile: "9448145583", role: "TSM" },
+    { name: "Mudiyala Murali Mohan Reddy", email: "murali_mohan_reddy.mudiyala@syngenta.com", mobile: "7981061471", role: "TSM" },
+      { name: "Gnanasekaran Vijay Raj", email: "Vijay_Raj.Gnanasekaran@syngenta.com", mobile: "6380486910", role: "TSM" },
+      { name: "Pugalenthi Balaguru", email: "Balaguru.Pugalenthi@syngenta.com", mobile: "8778501012", role: "TSM" },
+      { name: "BHASKARA BABU S", email: "bhaskarababu.shivanna@syngenta.com", mobile: "9620629298", role: "TSM" },
+      { name: "Kishan Bhargav BP", email: "kishan_bhargava.bilichodu_parashuramappa@syngenta.com", mobile: "8792940390", role: "TSM" },
+      { name: "Sagar Hengde", email: "Sagar_Tanaji.Hengde@syngenta.com", mobile: "9637435927", role: "TSM" },
+      { name: "Sudan Baban Ghadyale", email: "Sudan.Ghadyale@syngenta.com", mobile: "9561040160", role: "TSM" },
+       { name: "Sandesh Arun Bedre", email: "Sandesh_Arun.Bedre@syngenta.com", mobile: "9975269878", role: "TSM" },
+        { name: "Prashant Gaikwad", email: "Prashantrao_Ankush.Gaikwad@syngenta.com", mobile: "8329137714", role: "TSM" },
+         { name: "Jitendra Patel", email: "Jitendra.Patel@syngenta.com", mobile: "9638244944", role: "TSM" },
+          { name: "Nitesh Kumar Jaiswal", email: "Nitesh_Kumar.Jaiswal@syngenta.com", mobile: "6264767040", role: "TSM" },
+       
+  { name: "SHASHANK G R", email: "shashank.gowdeti_ramesh@syngenta.com", mobile: "855356182", role: "TA" },
+  { name: "Mahendra B Hittalamani", email: "mahendra_b.hittalamani@syngenta.com", mobile: "9632508286", role: "TA" },
+  { name: "Venkatesha", email: "venkatesha_a.eshwarappa@syngenta.com", mobile: "9986720850", role: "TA" },
+  { name: "Revana Naik", email: "revana_naik.patan_somla_naik@syngenta.com", mobile: "9148314364", role: "TA" },
+  { name: "Swapnil Pavhane", email: "Swapnil_Gopichand.Pavhane@syngenta.com", mobile: "8551905392", role: "TA" },
+  { name: "Swanand Rajput", email: "Swanand_Suresh.Rajput-1@syngenta.com", mobile: "8605943002", role: "TA" },
+  { name: "Sagar Bhalerao", email: "Sagar_Uttam.Bhalerao-1@syngenta.com", mobile: "9604973887", role: "TA" },
+  { name: "Sachin Sambhaji Chavan", email: "Sachin_Sambhaji.Chavan@syngenta.com", mobile: "7028567706", role: "TA" },
+  { name: "Shivam Yashwant Salunkhe", email: "Shivam_Yashwant.Salunkhe@syngenta.com", mobile: "7249111076", role: "TA" },
+  { name: "Vinkare Swapnil Kailas ", email: "swapnil_kailas.vinkare@syngenta.com", mobile: "9923174399", role: "TA" },
+  { name: "Hede Heemanshu Deepakrao ", email: "Heemanshu_Deepakrao.Hede@syngenta.com", mobile: "7447209693", role: "TA" },
+  { name: "Padmakar Mandile", email: "Padmakar_Bhagwan.Mandile@syngenta.com", mobile: "9988665544", role: "TA" },
+  { name: "Chandrashekhar Yadav", email: "Chandrashekhar.Yadav@syngenta.com", mobile: "9669014483", role: "TA" },
+  { name: "Kashyap Sojitra", email: "Kashyap_Bharatbhai.Sojitra@syngenta.com", mobile: "7043765755", role: "TA" },
+  { name: "Ashutosh Mohite", email: "Ashutosh_Balasaheb.Mohite@syngenta.com", mobile: "8600890630", role: "TA" },
+  { name: "Vasu Santoki", email: "Vasu_Dilipbhai.Santoki@syngenta.com", mobile: "9714972712", role: "TA" },
+  { name: "Ashwin Patidar", email: "Ashwin.Patidar@syngenta.com", mobile: "9685017940", role: "TA" },
+  { name: "Sawan Patidar", email: "Sawan.Patidar@syngenta.com", mobile: "9691216927", role: "TA" },
+  { name: "Sushant Kumar Dewangan", email: "Sushant_Kumar.Dewangan@syngenta.com", mobile: "7067052187", role: "TA" },
+  { name: "Mr. Akshay Yadav", email: "Akshay.Yadav@syngenta.com", mobile: "6260633132", role: "TA" },
+
+  { name: "Murtuza Jahagirdar", email: "murtuza_qadri.jahagirdar@syngenta.com", mobile: "6360633254", role: "AM" },
+  { name: "Ashish Bankhele", email: "Ashish_Dinkar.Bankhile@syngenta.com", mobile: "9763358586", role: "AM" },
+   { name: "Ganesh D. Bhandurge ", email: "Ganesh_Datta.Bhandurge@syngenta.com", mobile: "9325376761", role: "AM" },
+    { name: "Nayak Amarsingh Gunvantrao", email: "Amarsingh_Gunvatrao.Nayak@syngenta.com", mobile: "9970277422", role: "AM" },
+     { name: "Lokesh Arekar", email: "Lokesh_Vijay.Arekar@syngenta.com", mobile: "9925228305", role: "AM" },
+      { name: "Omprakash Bhosale", email: "Omprakash_Sadashiv.Bhosale@syngenta.com", mobile: "9970553392", role: "AM" },
+       { name: "Nitin", email: "nitin.nsm@company.com", mobile: "7711223344", role: "AM" },
+
+        { name: "Sejal", email: "sharmasejal2701@gmail.com", mobile: "7009622642", role: "NSM" },
+          { name: "Suman Kumar", email: "sksuman14@gmail.com", mobile: "8124660891", role: "CM" },
+
+  
+   
+];
