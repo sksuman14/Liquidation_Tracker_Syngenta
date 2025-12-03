@@ -14,7 +14,7 @@ export default function AM() {
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/completed");
+      const response = await fetch("/api/server/completed");
       if (!response.ok) throw new Error("Server error");
 
       const allRecords = await response.json();
@@ -33,7 +33,7 @@ export default function AM() {
     if (!window.confirm("Approve this record as Area Manager (AM)?\nIt will be sent to ZM.")) return;
 
     try {
-      const res = await fetch("/api/approve", {
+      const res = await fetch("/api/server/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -77,7 +77,7 @@ export default function AM() {
     if (!editingRecord) return;
 
     try {
-      const res = await fetch("/api/edit", {
+      const res = await fetch("/api/server/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
