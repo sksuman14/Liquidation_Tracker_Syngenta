@@ -18,7 +18,7 @@ export default function TA() {
   const fetchPendingRecords = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/completed");
+      const res = await fetch("/api/server/api/completed");
       if (!res.ok) throw new Error("Server error");
 
       const allData = await res.json();
@@ -43,7 +43,7 @@ export default function TA() {
     if (!window.confirm("Approve this record as Territory Assistant (TA)?\nIt will be sent to TSM.")) return;
 
     try {
-      const res = await fetch("/api/approve", {
+      const res = await fetch("/api/server/api/approve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,7 +81,7 @@ export default function TA() {
     if (!editingRecord) return;
 
     try {
-      const res = await fetch("/api/edit", {
+      const res = await fetch("/api/server/api/edit", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
