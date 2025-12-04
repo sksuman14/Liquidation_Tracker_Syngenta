@@ -3,13 +3,13 @@ import React, { useState } from "react";
 import "./DataTable.css";
 import { ChevronDown, ChevronUp, User, MapPin, Calendar, Package, Edit3, CheckCircle } from "lucide-react";
 
-export default function DataTable({ 
-  data = [], 
-  showActions = false, 
-  currentRole, 
-  currentUser, 
-  onApprove, 
-  onEdit, 
+export default function DataTable({
+  data = [],
+  showActions = false,
+  currentRole,
+  currentUser,
+  onApprove,
+  onEdit,
   canApprove,
   canEdit,
   getStatusBadge
@@ -47,8 +47,8 @@ export default function DataTable({
               <th>Date</th>
               <th>Products</th>
               <th>Status</th>
-              {showActions && data.some(row => 
-                (canApprove && canApprove(row) !== false) || 
+              {showActions && data.some(row =>
+                (canApprove && canApprove(row) !== false) ||
                 (canEdit && canEdit(row) !== false)
               ) && <th>Actions</th>}
             </tr>
@@ -72,12 +72,12 @@ export default function DataTable({
                     <td><MapPin size={16} style={{ marginRight: 6, opacity: 0.7 }} /> {row.area || "-"}</td>
                     <td>
                       <Calendar size={14} style={{ marginRight: 4, opacity: 0.7 }} />
-                      <code style={{ 
-                        background: "#ecfdf5", 
-                        color: "#059669", 
-                        padding: "6px 12px", 
-                        borderRadius: "8px", 
-                        fontSize: "14px", 
+                      <code style={{
+                        background: "#ecfdf5",
+                        color: "#059669",
+                        padding: "6px 12px",
+                        borderRadius: "8px",
+                        fontSize: "14px",
                         fontWeight: "bold",
                         fontFamily: "monospace"
                       }}>
@@ -99,14 +99,14 @@ export default function DataTable({
                       <td>
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                           {showApproveBtn && (
-                            <button onClick={() => onApprove(row)} style={{ 
+                            <button onClick={() => onApprove(row)} style={{
                               background: "#059669", color: "white", border: "none", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: "bold", display: "flex", alignItems: "center", gap: 6
                             }}>
                               <CheckCircle size={16} /> Approve
                             </button>
                           )}
                           {showEditBtn && (
-                            <button onClick={() => onEdit(row)} style={{ 
+                            <button onClick={() => onEdit(row)} style={{
                               background: "#2563eb", color: "white", border: "none", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: "bold", display: "flex", alignItems: "center", gap: 6
                             }}>
                               <Edit3 size={16} /> Edit
@@ -118,46 +118,57 @@ export default function DataTable({
                     {showActions && !showAnyAction && <td style={{ color: "#94a3b8", fontStyle: "italic" }}>-</td>}
                   </tr>
 
-                  {/* EXPANDED PRODUCTS ROW - FAMILY + PRODUCT NAME + COLORS */}
-                {/* EXPANDED PRODUCTS ROW - FULL WIDTH + MOBILE SCROLL */}
-{isExpanded && (
+                  
+                  {/* EXPANDED PRODUCTS ROW - FULL WIDTH + MOBILE SCROLL */}
+                 {isExpanded && (
   <tr>
     <td colSpan={showActions && data.some(r => (canApprove?.(r) || canEdit?.(r))) ? 9 : 8} style={{ padding: 0 }}>
       <div className="expanded-products-container">
         {safeProducts.length > 0 ? (
-        <div className="products-grid">
-  {/* Header */}
-  <div className="products-header">
-    <div>PRODUCT FAMILY</div>
-    <div>PRODUCT NAME</div>
-    <div>SKU</div>
-    <div>OPENING</div>
-    <div>LIQ. QTY</div>
-  </div>
+          <div className="products-grid">
 
-  {/* Products */}
-  {safeProducts.map((p, i) => (
-    <div key={i} className="product-row">
-      <div className={`family-badge ${p.family?.toLowerCase() || 'default'}`}>
-        {p.family || "—"}
-      </div>
-      <div className="product-name">
-        {p.productName || p.product_name || "Unknown Product"}
-      </div>
-      <div className="sku">
-        {p.sku || "—"}
-      </div>
-      <div className="number">
-        {p.openingStock || p.opening_qty || 0}
-      </div>
-      <div className="liq-qty">
-        {p.liquidationQty || p.liquidation_qty || 0}
-      </div>
-    </div>
-  ))}
-</div>
+            {/* HEADER */}
+            <div className="products-header">
+              <div>PRODUCT FAMILY</div>
+              <div>PRODUCT NAME</div>
+              <div>SKU</div>
+              <div>OPENING</div>
+              <div>LIQ. QTY</div>
+            </div>
+
+            {/* ROWS – FAMILY + NAME IN ONE LINE */}
+            {safeProducts.map((p, i) => (
+              <div key={i} className="product-row">
+
+                {/* FAMILY + PRODUCT NAME IN ONE CELL */}
+                <div className="family-and-name">
+                  <div className={`family-badge ${p.family?.toLowerCase() || 'default'}`}>
+                    {p.family || "—"}
+                  </div>
+                  <div className="product-name-inline">
+                    {p.productName || p.product_name || "Unknown Product"}
+                  </div>
+                </div>
+
+                {/* SKU */}
+                <div className="sku">
+                  {p.sku || "—"}
+                </div>
+
+                {/* OPENING */}
+                <div className="number">
+                  {p.openingStock || p.opening_qty || 0}
+                </div>
+
+                {/* LIQ QTY */}
+                <div className="liq-qty">
+                  {p.liquidationQty || p.liquidation_qty || 0}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-          <div style={{ padding: "50px", textAlign: "center", color: "#94a3b8", fontSize: 15 }}>
+          <div style={{ padding: "50px", textAlign: "center", color: "#94a3b8" }}>
             No product details available
           </div>
         )}
