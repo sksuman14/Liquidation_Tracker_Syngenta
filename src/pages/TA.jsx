@@ -226,6 +226,7 @@ export default function TA() {
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead style={{ background: "#fed7aa" }}>
                   <tr>
+                    <th style={{ padding: "18px", textAlign: "left" }}>Product Family</th>
                     <th style={{ padding: "18px", textAlign: "left" }}>Product Name</th>
                     <th style={{ padding: "18px", textAlign: "left" }}>SKU</th>
                     <th style={{ padding: "18px", textAlign: "center" }}>Opening Stock</th>
@@ -236,6 +237,18 @@ export default function TA() {
                 <tbody>
                   {editForm.products.map((p, i) => (
                     <tr key={i} style={{ borderBottom: i !== editForm.products.length - 1 ? "1px solid #e2e8f0" : "none" }}>
+                      <td style={{ padding: "14px" }}>
+                        <input
+                          value={p.family || ""}
+                          onChange={e => {
+                            const np = [...editForm.products];
+                            np[i].family = e.target.value;
+                            setEditForm({ ...editForm, products: np });
+                          }}
+                          placeholder="WSF / MIC / BIOF / PBS"
+                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
+                        />
+                      </td>
                       <td style={{ padding: "14px" }}>
                         <input
                           value={p.productName || p.product_name || ""}

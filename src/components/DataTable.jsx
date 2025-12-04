@@ -131,7 +131,7 @@ export default function DataTable({
               <div>Product Family</div>
               <div>Product Name</div>
               <div>SKU</div>
-              <div>Opening</div>
+              <div>Opening Stock</div>
               <div>Liq. Qty</div>
             </div>
 
