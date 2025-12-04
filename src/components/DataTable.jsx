@@ -119,93 +119,61 @@ export default function DataTable({
                   </tr>
 
                   {/* EXPANDED PRODUCTS ROW - FAMILY + PRODUCT NAME + COLORS */}
-                  {isExpanded && (
-                    <tr>
-                      <td colSpan={showActions && data.some(r => (canApprove?.(r) || canEdit?.(r))) ? 9 : 8} style={{ padding: 0 }}>
-                        <div style={{ margin: "20px", background: "#f8fafc", borderRadius: "12px", border: "2px solid #e0e7ff", overflow: "hidden" }}>
-                          {safeProducts.length > 0 ? (
-                            <div style={{ padding: "16px" }}>
-                              {/* Header */}
-                              <div style={{ 
-                                display: "grid", 
-                                gridTemplateColumns: "100px 220px 120px 100px 100px", 
-                                gap: "12px", 
-                                fontWeight: "600", 
-                                color: "#1e293b", 
-                                fontSize: 14, 
-                                padding: "12px 0",
-                                borderBottom: "2px solid #c7d2fe"
-                              }}>
-                                <div>Family</div>
-                                <div>Product Name</div>
-                                <div>SKU</div>
-                                <div style={{ textAlign: "center" }}>Opening</div>
-                                <div style={{ textAlign: "center" }}>Liq. Qty</div>
-                              </div>
+                {/* EXPANDED PRODUCTS ROW - FULL WIDTH + MOBILE SCROLL */}
+{isExpanded && (
+  <tr>
+    <td colSpan={showActions && data.some(r => (canApprove?.(r) || canEdit?.(r))) ? 9 : 8} style={{ padding: 0 }}>
+      <div className="expanded-products-container">
+        {safeProducts.length > 0 ? (
+          <div className="products-grid">
+            {/* Header */}
+            <div className="products-header">
+              <div>Family</div>
+              <div>Product Name</div>
+              <div>SKU</div>
+              <div>Opening</div>
+              <div>Liq. Qty</div>
+            </div>
 
-                              {/* Products List */}
-                              {safeProducts.map((p, i) => (
-                                <div
-                                  key={i}
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "100px 220px 120px 100px 100px",
-                                    gap: "12px",
-                                    padding: "14px 0",
-                                    borderBottom: i === safeProducts.length - 1 ? "none" : "1px dashed #cbd5e1",
-                                    alignItems: "center"
-                                  }}
-                                >
-                                  {/* Family Badge */}
-                                  <div style={{
-                                    padding: "8px 12px",
-                                    borderRadius: 10,
-                                    fontWeight: "bold",
-                                    fontSize: 12,
-                                    textAlign: "center",
-                                    background: 
-                                      p.family === "PBS" ? "#dbeafe" :
-                                      p.family === "WSF" ? "#fef3c7" :
-                                      p.family === "MIC" ? "#d1fae5" : "#e2e8f0",
-                                    color: 
-                                      p.family === "PBS" ? "#1e40af" :
-                                      p.family === "WSF" ? "#92400e" :
-                                      p.family === "MIC" ? "#065f46" : "#475569"
-                                  }}>
-                                    {p.family || "—"}
-                                  </div>
+            {/* Products List */}
+            {safeProducts.map((p, i) => (
+              <div key={i} className="product-row">
+                {/* Family Badge */}
+                <div className={`family-badge ${p.family?.toLowerCase() || 'default'}`}>
+                  {p.family || "—"}
+                </div>
 
-                                  {/* Product Name */}
-                                  <div style={{ fontWeight: "600", color: "#1e293b", fontSize: 15 }}>
-                                    {p.productName || p.product_name || "Unknown Product"}
-                                  </div>
+                {/* Product Name */}
+                <div className="product-name">
+                  {p.productName || p.product_name || "Unknown Product"}
+                </div>
 
-                                  {/* SKU */}
-                                  <div style={{ color: "#64748b", fontFamily: "monospace", fontWeight: "500" }}>
-                                    {p.sku || "—"}
-                                  </div>
+                {/* SKU */}
+                <div className="sku">
+                  {p.sku || "—"}
+                </div>
 
-                                  {/* Opening Stock */}
-                                  <div style={{ textAlign: "center", fontWeight: "500" }}>
-                                    {p.openingStock || p.opening_qty || 0}
-                                  </div>
+                {/* Opening Stock */}
+                <div className="number">
+                  {p.openingStock || p.opening_qty || 0}
+                </div>
 
-                                  {/* Liquidation Qty - RED */}
-                                  <div style={{ textAlign: "center", fontWeight: "bold", color: "#dc2626", fontSize: 16 }}>
-                                    {p.liquidationQty || p.liquidation_qty || 0}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div style={{ padding: "50px", textAlign: "center", color: "#94a3b8" }}>
-                              No product details available
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+                {/* Liquidation Qty - RED */}
+                <div className="liq-qty">
+                  {p.liquidationQty || p.liquidation_qty || 0}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: "50px", textAlign: "center", color: "#94a3b8", fontSize: 15 }}>
+            No product details available
+          </div>
+        )}
+      </div>
+    </td>
+  </tr>
+)}
                 </React.Fragment>
               );
             })}

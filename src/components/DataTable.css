@@ -172,3 +172,114 @@
 
   .action-buttons { gap: 8px; }
 }
+/* ==================================================== */
+/*       EXPANDED PRODUCTS ROW - FULL WIDTH & MOBILE     */
+/* ==================================================== */
+
+.expanded-products-container {
+  margin: 20px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 2px solid #dbeafe;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.products-grid {
+  padding: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.products-header,
+.product-row {
+  display: grid;
+  grid-template-columns: 100px 1.8fr 1fr 0.9fr 0.9fr;
+  gap: 16px;
+  align-items: center;
+  min-width: 700px; /* Forces horizontal scroll on small screens */
+}
+
+.products-header {
+  padding: 16px 0;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: #1e293b;
+  border-bottom: 3px solid #93c5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.product-row {
+  padding: 16px 0;
+  border-bottom: 1px dashed #cbd5e1;
+  font-size: 15px;
+}
+
+.product-row:last-child {
+  border-bottom: none;
+}
+
+/* Family Badge - Beautiful Colors */
+.family-badge {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 12.5px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.family-badge.biof   { background: #dbeafe; color: #1e40af; }
+.family-badge.pbs    { background: #dbeafe; color: #1e40af; }
+.family-badge.wsf    { background: #fef3c7; color: #92400e; }
+.family-badge.mic    { background: #d1fae5; color: #065f46; }
+.family-badge.default { background: #e2e8f0; color: #475569; }
+
+/* Product Name - Bold & Clear */
+.product-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 15.5px;
+}
+
+/* SKU - Monospace */
+.sku {
+  font-family: 'Courier New', monospace;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Numbers */
+.number {
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+}
+
+.liq-qty {
+  text-align: center;
+  font-weight: 900;
+  color: #dc2626;
+  font-size: 17px;
+}
+
+/* Mobile Scroll Hint */
+@media (max-width: 768px) {
+  .products-grid {
+    padding: 16px;
+  }
+  
+  .products-header,
+  .product-row {
+    grid-template-columns: 90px 1.6fr 1fr 0.8fr 0.8fr;
+    gap: 12px;
+    font-size: 14px;
+  }
+  
+  .family-badge {
+    padding: 8px 12px;
+    font-size: 11.5px;
+  }
+}
