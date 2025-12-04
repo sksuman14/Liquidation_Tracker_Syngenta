@@ -1,4 +1,4 @@
-// src/components/DataTable.jsx → FINAL VERSION (Action column disappears after final approval)
+// src/components/DataTable.jsx → FINAL UPGRADE: FAMILY + PRODUCT NAME + COLORS + PERFECT LAYOUT
 import React, { useState } from "react";
 import "./DataTable.css";
 import { ChevronDown, ChevronUp, User, MapPin, Calendar, Package, Edit3, CheckCircle } from "lucide-react";
@@ -10,8 +10,8 @@ export default function DataTable({
   currentUser, 
   onApprove, 
   onEdit, 
-  canApprove,        // (row) => true/false
-  canEdit,           // (row) => true/false  ← NEW SUPPORT
+  canApprove,
+  canEdit,
   getStatusBadge
 }) {
   const [expandedIndex, setExpandedIndex] = useState(null);
@@ -47,7 +47,6 @@ export default function DataTable({
               <th>Date</th>
               <th>Products</th>
               <th>Status</th>
-              {/* Action column only appears if AT LEAST ONE row has actions */}
               {showActions && data.some(row => 
                 (canApprove && canApprove(row) !== false) || 
                 (canEdit && canEdit(row) !== false)
@@ -59,7 +58,6 @@ export default function DataTable({
               const isExpanded = expandedIndex === index;
               const safeProducts = Array.isArray(row.products) ? row.products.filter(p => p) : [];
 
-              // Determine if this row should show any actions
               const showApproveBtn = canApprove && canApprove(row) !== false;
               const showEditBtn = canEdit && canEdit(row) !== false;
               const showAnyAction = showApproveBtn || showEditBtn;
@@ -97,95 +95,111 @@ export default function DataTable({
                     </td>
                     <td>{getStatusBadge?.(row.status) || row.status}</td>
 
-                    {/* Only render Actions cell if this row has any action */}
                     {showActions && showAnyAction && (
                       <td>
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                           {showApproveBtn && (
-                            <button 
-                              onClick={() => onApprove(row)} 
-                              style={{ 
-                                background: "#059669", 
-                                color: "white", 
-                                border: "none", 
-                                padding: "10px 14px", 
-                                borderRadius: 8, 
-                                fontSize: 13,
-                                fontWeight: "bold",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6
-                              }}
-                            >
+                            <button onClick={() => onApprove(row)} style={{ 
+                              background: "#059669", color: "white", border: "none", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: "bold", display: "flex", alignItems: "center", gap: 6
+                            }}>
                               <CheckCircle size={16} /> Approve
                             </button>
                           )}
                           {showEditBtn && (
-                            <button 
-                              onClick={() => onEdit(row)} 
-                              style={{ 
-                                background: "#2563eb", 
-                                color: "white", 
-                                border: "none", 
-                                padding: "10px 14px", 
-                                borderRadius: 8, 
-                                fontSize: 13,
-                                fontWeight: "bold",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6
-                              }}
-                            >
+                            <button onClick={() => onEdit(row)} style={{ 
+                              background: "#2563eb", color: "white", border: "none", padding: "10px 14px", borderRadius: 8, fontSize: 13, fontWeight: "bold", display: "flex", alignItems: "center", gap: 6
+                            }}>
                               <Edit3 size={16} /> Edit
                             </button>
                           )}
                         </div>
                       </td>
                     )}
-
-                    {/* If no actions for this row → render empty cell to maintain layout */}
                     {showActions && !showAnyAction && <td style={{ color: "#94a3b8", fontStyle: "italic" }}>-</td>}
                   </tr>
 
-                  {/* Expanded Product Details */}
+                  {/* EXPANDED PRODUCTS ROW - FAMILY + PRODUCT NAME + COLORS */}
                   {isExpanded && (
                     <tr>
                       <td colSpan={showActions && data.some(r => (canApprove?.(r) || canEdit?.(r))) ? 9 : 8} style={{ padding: 0 }}>
-                        <div style={{ margin: "16px 20px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #cbd5e1", overflow: "hidden" }}>
+                        <div style={{ margin: "20px", background: "#f8fafc", borderRadius: "12px", border: "2px solid #e0e7ff", overflow: "hidden" }}>
                           {safeProducts.length > 0 ? (
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                              <thead>
-                                <tr style={{ background: "#dbeafe" }}>
-                                  <th style={{ padding: "12px", textAlign: "left" }}>SKU</th>
-                                  <th style={{ padding: "12px", textAlign: "left" }}>Product</th>
-                                  <th style={{ padding: "12px", textAlign: "center" }}>Opening</th>
-                                  <th style={{ padding: "12px", textAlign: "center" }}>Liq. Qty</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {safeProducts.map((p, i) => (
-                                  <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#f1f5f9" }}>
-                                    <td style={{ padding: "12px" }}>
-                                      <code style={{ background: "#e0e7ff", padding: "4px 8px", borderRadius: "4px" }}>
-                                        {p.sku || "-"}
-                                      </code>
-                                    </td>
-                                    <td style={{ padding: "12px", fontWeight: "500" }}>
-                                      {p.productName || p.product_name || "Unknown"}
-                                    </td>
-                                    <td style={{ padding: "12px", textAlign: "center" }}>
-                                      {p.openingStock || p.opening_qty || 0}
-                                    </td>
-                                    <td style={{ padding: "12px", textAlign: "center", fontWeight: "bold", color: "#dc2626" }}>
-                                      {p.liquidationQty || p.liquidation_qty || 0}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            <div style={{ padding: "16px" }}>
+                              {/* Header */}
+                              <div style={{ 
+                                display: "grid", 
+                                gridTemplateColumns: "100px 220px 120px 100px 100px", 
+                                gap: "12px", 
+                                fontWeight: "600", 
+                                color: "#1e293b", 
+                                fontSize: 14, 
+                                padding: "12px 0",
+                                borderBottom: "2px solid #c7d2fe"
+                              }}>
+                                <div>Family</div>
+                                <div>Product Name</div>
+                                <div>SKU</div>
+                                <div style={{ textAlign: "center" }}>Opening</div>
+                                <div style={{ textAlign: "center" }}>Liq. Qty</div>
+                              </div>
+
+                              {/* Products List */}
+                              {safeProducts.map((p, i) => (
+                                <div
+                                  key={i}
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "100px 220px 120px 100px 100px",
+                                    gap: "12px",
+                                    padding: "14px 0",
+                                    borderBottom: i === safeProducts.length - 1 ? "none" : "1px dashed #cbd5e1",
+                                    alignItems: "center"
+                                  }}
+                                >
+                                  {/* Family Badge */}
+                                  <div style={{
+                                    padding: "8px 12px",
+                                    borderRadius: 10,
+                                    fontWeight: "bold",
+                                    fontSize: 12,
+                                    textAlign: "center",
+                                    background: 
+                                      p.family === "PBS" ? "#dbeafe" :
+                                      p.family === "WSF" ? "#fef3c7" :
+                                      p.family === "MIC" ? "#d1fae5" : "#e2e8f0",
+                                    color: 
+                                      p.family === "PBS" ? "#1e40af" :
+                                      p.family === "WSF" ? "#92400e" :
+                                      p.family === "MIC" ? "#065f46" : "#475569"
+                                  }}>
+                                    {p.family || "—"}
+                                  </div>
+
+                                  {/* Product Name */}
+                                  <div style={{ fontWeight: "600", color: "#1e293b", fontSize: 15 }}>
+                                    {p.productName || p.product_name || "Unknown Product"}
+                                  </div>
+
+                                  {/* SKU */}
+                                  <div style={{ color: "#64748b", fontFamily: "monospace", fontWeight: "500" }}>
+                                    {p.sku || "—"}
+                                  </div>
+
+                                  {/* Opening Stock */}
+                                  <div style={{ textAlign: "center", fontWeight: "500" }}>
+                                    {p.openingStock || p.opening_qty || 0}
+                                  </div>
+
+                                  {/* Liquidation Qty - RED */}
+                                  <div style={{ textAlign: "center", fontWeight: "bold", color: "#dc2626", fontSize: 16 }}>
+                                    {p.liquidationQty || p.liquidation_qty || 0}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           ) : (
-                            <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>
-                              No product details
+                            <div style={{ padding: "50px", textAlign: "center", color: "#94a3b8" }}>
+                              No product details available
                             </div>
                           )}
                         </div>
