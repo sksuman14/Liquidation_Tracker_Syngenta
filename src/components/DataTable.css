@@ -145,28 +145,26 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
 
-/* ==================================================== */
-/*     FINAL SINGLE-LINE FAMILY + NAME – PERFECT CENTER */
-/* ==================================================== */
-
 .products-grid {
   padding: 20px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Header */
+/* GRID LAYOUT — PERFECT CENTERING */
 .products-header,
 .product-row {
   display: grid;
-  grid-template-columns: 2.2fr 1.1fr 0.9fr 0.9fr;   /* 4 columns now */
+  grid-template-columns: 100px 1.8fr 1fr 0.9fr 0.9fr;
   gap: 16px;
   align-items: center;
-  min-width: 780px;
-  padding: 0 20px;
+  min-width: 720px;
+  text-align: center;           /* ← Center all text by default */
+  justify-items: center;        /* ← Center all content in cells */
 }
 
 .products-header {
-  padding: 18px 0;
+  padding: 16px 0;
   font-weight: 700;
   font-size: 14.5px;
   color: #1e293b;
@@ -175,13 +173,8 @@
   letter-spacing: 0.8px;
 }
 
-.products-header > div {
-  text-align: center;
-}
-
-/* Each product row */
 .product-row {
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px dashed #cbd5e1;
   font-size: 15px;
 }
@@ -190,49 +183,38 @@
   border-bottom: none;
 }
 
-/* FAMILY + NAME IN ONE CELL – SINGLE LINE */
-.family-and-name {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;     /* badge left, name follows */
-  gap: 14px;
-  padding-left: 12px;
-}
-
-/* Badge stays same */
+/* Family Badge — Centered */
 .family-badge {
-  padding: 9px 16px;
+  padding: 10px 16px;
   border-radius: 12px;
   font-weight: 800;
   font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  flex-shrink: 0;
-  min-width: 62px;
-  text-align: center;
 }
 
-.family-badge.wsf    { background: #fef3c7; color: #92400e; }
-.family-badge.mic    { background: #d1fae5; color: #065f46; }
 .family-badge.biof,
 .family-badge.pbs    { background: #dbeafe; color: #1e40af; }
+.family-badge.wsf    { background: #fef3c7; color: #92400e; }
+.family-badge.mic    { background: #d1fae5; color: #065f46; }
 .family-badge.default { background: #e2e8f0; color: #475569; }
 
-/* Product name – perfectly centered under its header */
-.product-name-inline {
+/* Product Name — Only exception: left-aligned */
+.product-name {
   font-weight: 700;
   color: #1e293b;
-  font-size: 15.8px;
-  flex: 1;
-  text-align: left;
+  font-size: 15.5px;
+  text-align: left !important;
+  justify-self: start !important;
+  padding-left: 8px;
 }
 
-/* SKU, Opening, Liq.Qty – centered */
+/* SKU, Opening, Liq.Qty — Perfectly centered */
 .sku,
 .number,
 .liq-qty {
   font-weight: 600;
-  text-align: center;
+  color: #374151;
 }
 
 .sku {
@@ -246,27 +228,32 @@
   font-size: 17px;
 }
 
-/* Mobile */
+/* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
+  .table-card { min-width: 900px; }
+  .modern-table { font-size: 13.8px; }
+  .modern-table th,
+  .modern-table td { padding: 14px 10px; }
+
+  .approve-btn,
+  .edit-btn {
+    min-width: 110px !important;
+    width: 110px !important;
+    height: 44px !important;
+    font-size: 12.5px;
+  }
+
+  .products-grid { padding: 16px; }
+  
   .products-header,
   .product-row {
-    grid-template-columns: 2fr 1fr 0.9fr 0.9fr;
+    grid-template-columns: 90px 1.6fr 1fr 0.8fr 0.8fr;
     gap: 12px;
-    padding: 0 12px;
-    min-width: 680px;
+    font-size: 14px;
   }
-
-  .family-and-name {
-    gap: 10px;
-    padding-left: 8px;
-  }
-
+  
   .family-badge {
-    padding: 7px 12px;
+    padding: 8px 12px;
     font-size: 11.5px;
-  }
-
-  .product-name-inline {
-    font-size: 14.8px;
   }
 }
