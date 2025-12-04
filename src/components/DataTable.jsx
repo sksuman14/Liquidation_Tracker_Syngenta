@@ -128,7 +128,7 @@ export default function DataTable({
           <div className="products-grid">
             {/* Header */}
             <div className="products-header">
-              <div>Family</div>
+              <div>PRODUCT Family</div>
               <div>Product Name</div>
               <div>SKU</div>
               <div>Opening</div>
