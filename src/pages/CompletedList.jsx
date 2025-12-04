@@ -193,14 +193,15 @@ export default function ApprovalDashboard() {
               <tbody>
                 {editForm.products.map((p, i) => (
                   <tr key={i}>
-                    <td><input value={p.sku || ""} onChange={(e) => {
-                      const newProducts = [...editForm.products];
-                      newProducts[i].sku = e.target.value;
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ width: "100%", padding: 8 }} /></td>
+                   
                     <td><input value={p.productName || ""} onChange={(e) => {
                       const newProducts = [...editForm.products];
                       newProducts[i].productName = e.target.value;
+                      setEditForm({...editForm, products: newProducts});
+                    }} style={{ width: "100%", padding: 8 }} /></td>
+                     <td><input value={p.sku || ""} onChange={(e) => {
+                      const newProducts = [...editForm.products];
+                      newProducts[i].sku = e.target.value;
                       setEditForm({...editForm, products: newProducts});
                     }} style={{ width: "100%", padding: 8 }} /></td>
                     <td><input type="number" value={p.openingStock || 0} onChange={(e) => {
