@@ -19,18 +19,17 @@ export default function ApprovalDashboard() {
   const currentRole = localStorage.getItem("userRole") || "TA";
   const currentUser = localStorage.getItem("username") || "User";
 
-  const roleOrder = { TA: 1, TSM: 2, AM: 3, ZM: 4, NSM: 5, CM: 6 };
-  const currentLevel = roleOrder[currentRole] || 0;
+  const roleOrder = { TSM: 1, AM: 2, ZM: 3, NSM: 4, CM: 5 };
+const currentLevel = roleOrder[currentRole] || 0;
 
   const statusToLevel = {
-    pending_ta: 1,
-    approved_by_ta: 2,
-    approved_by_tsm: 3,
-    approved_by_am: 4,
-    approved_by_zm: 5,
-    approved_by_nsm: 6,
-    fully_approved: 7
-  };
+  pending_tsm: 1,
+  approved_by_tsm: 2,
+  approved_by_am: 3,
+  approved_by_zm: 4,
+  approved_by_nsm: 5,
+  fully_approved: 6
+};
 
   const fetchRecords = async () => {
     try {
@@ -128,9 +127,8 @@ export default function ApprovalDashboard() {
 
   const getStatusBadge = (status) => {
     const map = {
-      pending_ta: { text: "Pending TA", color: "#f59e0b" },
-      approved_by_ta: { text: "TA Approved", color: "#10b981" },
-      approved_by_tsm: { text: "TSM Approved", color: "#10b981" },
+   pending_tsm: { text: "Pending TSM", color: "#f59e0b" },
+  approved_by_tsm: { text: "TSM Approved", color: "#10b981" },
       approved_by_am: { text: "AM Approved", color: "#10b981" },
       approved_by_zm: { text: "ZM Approved", color: "#10b981" },
       approved_by_nsm: { text: "NSM Approved", color: "#10b981" },

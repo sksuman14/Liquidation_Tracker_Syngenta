@@ -35,7 +35,7 @@ const isActive = (role) => {
       <h2 className="sidebar-title">Approval Levels</h2>
 
       <ul>
-        {["TA", "TSM", "AM", "ZM", "NSM", "CM / NMM"].map((role) => (
+        {["TSM", "AM", "ZM", "NSM", "CM / NMM"].map((role) => (
          <li
   key={role}
   onClick={() => handleRoleClick(role)}

@@ -15,9 +15,9 @@ export default async function handler(req, res) {
 
   const { phone_number, record_date, role, user } = req.body;
 
-  if (!["TA", "TSM", "AM", "ZM", "NSM", "CM"].includes(role)) {
-    return res.status(400).json({ error: "Invalid role" });
-  }
+ if (!["TSM", "AM", "ZM", "NSM", "CM"].includes(role)) {
+  return res.status(400).json({ error: "Invalid role" });
+}
 
   try {
     const current = await pool.query(
@@ -31,22 +31,28 @@ export default async function handler(req, res) {
 
     const record = current.rows[0];
     const approvedBy = record.approved_by || [];
-    const currentStatus = record.status || "pending_ta";
+    const currentStatus = record.status || "pending_tsm";
 
-    const statusFlow = ["pending_ta","approved_by_ta","approved_by_tsm","approved_by_am","approved_by_zm","approved_by_nsm","fully_approved"];
+   const statusFlow = [
+  "pending_tsm",
+  "approved_by_tsm", 
+  "approved_by_am", 
+  "approved_by_zm", 
+  "approved_by_nsm", 
+  "fully_approved"
+];
     const currentIndex = statusFlow.indexOf(currentStatus);
     if (currentIndex === -1 || currentIndex >= 6) {
       return res.status(400).json({ error: "Cannot approve" });
     }
 
     const roleToStatus = { 
-      TA: "approved_by_ta", 
-      TSM: "approved_by_tsm", 
-      AM: "approved_by_am", 
-      ZM: "approved_by_zm", 
-      NSM: "approved_by_nsm", 
-      CM: "fully_approved" 
-    };
+  TSM: "approved_by_tsm", 
+  AM:  "approved_by_am", 
+  ZM:  "approved_by_zm", 
+  NSM: "approved_by_nsm", 
+  CM:  "fully_approved" 
+};
 
     if (roleToStatus[role] !== statusFlow[currentIndex + 1]) {
       return res.status(400).json({ error: "Not your turn!" });

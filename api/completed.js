@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       products: row.products 
         ? (typeof row.products === 'string' ? JSON.parse(row.products) : row.products)
         : [],
-      status: row.status || "pending_ta",
+      status: row.status || "pending_tsm",
       approved_by: row.approved_by || [],
       record_date: row.record_date ? row.record_date.toLocaleDateString('en-CA') : null
     }));
