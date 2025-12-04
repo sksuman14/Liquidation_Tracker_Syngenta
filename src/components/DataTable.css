@@ -152,22 +152,22 @@
 }
 
 /* ==================================================== */
-/*       FINAL FIX: PRODUCT NAME PERFECTLY ALIGNED       */
+/*       FINAL PERFECT ALIGNMENT — MATCHES IMAGE 100%   */
 /* ==================================================== */
 
 .products-header,
 .product-row {
   display: grid;
-  grid-template-columns: 100px 1.8fr 1fr 0.9fr 0.9fr;
+  grid-template-columns: 110px 2fr 1.2fr 1fr 1fr;  /* Exact proportions from your design */
   gap: 16px;
   align-items: center;
-  min-width: 720px;
-  text-align: center;
-  justify-items: center;         /* All cells centered by default */
+  min-width: 800px;
+  padding: 0 20px;
 }
 
+/* Header - Centered Text */
 .products-header {
-  padding: 16px 0;
+  padding: 18px 0;
   font-weight: 700;
   font-size: 14.5px;
   color: #1e293b;
@@ -176,8 +176,14 @@
   letter-spacing: 0.8px;
 }
 
+.products-header > div {
+  text-align: center;
+  justify-self: center;
+}
+
+/* Each Product Row */
 .product-row {
-  padding: 16px 0;
+  padding: 18px 0;
   border-bottom: 1px dashed #cbd5e1;
   font-size: 15px;
 }
@@ -186,78 +192,89 @@
   border-bottom: none;
 }
 
-/* FAMILY BADGE — stays centered */
+/* 1. FAMILY BADGE - Perfectly centered in its column */
 .family-badge {
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 12px;
   font-weight: 800;
   font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
+  
+  /* Force center alignment */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  margin: 0 auto;
 }
 
-.family-badge.biof,
-.family-badge.pbs    { background: #dbeafe; color: #1e40af; }
+/* Family Colors */
 .family-badge.wsf    { background: #fef3c7; color: #92400e; }
 .family-badge.mic    { background: #d1fae5; color: #065f46; }
+.family-badge.biof,
+.family-badge.pbs    { background: #dbeafe; color: #1e40af; }
 .family-badge.default { background: #e2e8f0; color: #475569; }
 
-/* PRODUCT NAME — LEFT-ALIGNED BUT STILL UNDER ITS HEADER */
+/* 2. PRODUCT NAME - Left aligned, full width, clean indent */
 .product-name {
   font-weight: 700;
   color: #1e293b;
-  font-size: 15.5px;
-  text-align: left;           /* Text is left-aligned */
-  justify-self: start;        /* Stays in correct column */
-  width: 100%;                /* Takes full width of its grid cell */
-  padding-left: 12px;         /* Slight indent for beauty */
+  font-size: 15.8px;
+  text-align: left;
+  justify-self: start;
+  padding-left: 8px;
+  width: 100%;
 }
 
-/* SKU, Opening, Liq.Qty — Perfectly centered */
-.sku,
-.number,
-.liq-qty {
-  font-weight: 600;
-  color: #374151;
-}
-
+/* 3. SKU - Centered, monospace */
 .sku {
   font-family: 'Courier New', monospace;
   color: #64748b;
+  font-weight: 600;
+  text-align: center;
+  justify-self: center;
+}
+
+/* 4 & 5. Opening & Liq.Qty - Perfectly centered numbers */
+.number,
+.liq-qty {
+  font-weight: 700;
+  text-align: center;
+  justify-self: center;
+}
+
+.number {
+  color: #374151;
 }
 
 .liq-qty {
-  font-weight: 900;
   color: #dc2626;
+  font-weight: 900;
   font-size: 17px;
 }
 
-/* MOBILE RESPONSIVE */
+/* Mobile Adjustment */
 @media (max-width: 768px) {
-  .table-card { min-width: 900px; }
-  .modern-table { font-size: 13.8px; }
-  .modern-table th,
-  .modern-table td { padding: 14px 10px; }
-
-  .approve-btn,
-  .edit-btn {
-    min-width: 110px !important;
-    width: 110px !important;
-    height: 44px !important;
-    font-size: 12.5px;
-  }
-
-  .products-grid { padding: 16px; }
-  
   .products-header,
   .product-row {
-    grid-template-columns: 90px 1.6fr 1fr 0.8fr 0.8fr;
+    grid-template-columns: 90px 1.8fr 1.1fr 0.9fr 0.9fr;
     gap: 12px;
-    font-size: 14px;
+    padding: 0 12px;
+    min-width: 700px;
   }
-  
+
   .family-badge {
-    padding: 8px 12px;
+    padding: 8px 14px;
     font-size: 11.5px;
+  }
+
+  .product-name {
+    font-size: 14.8px;
+    padding-left: 6px;
+  }
+
+  .liq-qty {
+    font-size: 16px;
   }
 }

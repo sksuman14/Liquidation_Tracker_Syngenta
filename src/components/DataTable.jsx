@@ -125,46 +125,37 @@ export default function DataTable({
     <td colSpan={showActions && data.some(r => (canApprove?.(r) || canEdit?.(r))) ? 9 : 8} style={{ padding: 0 }}>
       <div className="expanded-products-container">
         {safeProducts.length > 0 ? (
-          <div className="products-grid">
-            {/* Header */}
-            <div className="products-header">
-              <div>PRODUCT Family</div>
-              <div>Product Name</div>
-              <div>SKU</div>
-              <div>Opening</div>
-              <div>Liq. Qty</div>
-            </div>
+        <div className="products-grid">
+  {/* Header */}
+  <div className="products-header">
+    <div>PRODUCT FAMILY</div>
+    <div>PRODUCT NAME</div>
+    <div>SKU</div>
+    <div>OPENING</div>
+    <div>LIQ. QTY</div>
+  </div>
 
-            {/* Products List */}
-            {safeProducts.map((p, i) => (
-              <div key={i} className="product-row">
-                {/* Family Badge */}
-                <div className={`family-badge ${p.family?.toLowerCase() || 'default'}`}>
-                  {p.family || "—"}
-                </div>
-
-                {/* Product Name */}
-                <div className="product-name">
-                  {p.productName || p.product_name || "Unknown Product"}
-                </div>
-
-                {/* SKU */}
-                <div className="sku">
-                  {p.sku || "—"}
-                </div>
-
-                {/* Opening Stock */}
-                <div className="number">
-                  {p.openingStock || p.opening_qty || 0}
-                </div>
-
-                {/* Liquidation Qty - RED */}
-                <div className="liq-qty">
-                  {p.liquidationQty || p.liquidation_qty || 0}
-                </div>
-              </div>
-            ))}
-          </div>
+  {/* Products */}
+  {safeProducts.map((p, i) => (
+    <div key={i} className="product-row">
+      <div className={`family-badge ${p.family?.toLowerCase() || 'default'}`}>
+        {p.family || "—"}
+      </div>
+      <div className="product-name">
+        {p.productName || p.product_name || "Unknown Product"}
+      </div>
+      <div className="sku">
+        {p.sku || "—"}
+      </div>
+      <div className="number">
+        {p.openingStock || p.opening_qty || 0}
+      </div>
+      <div className="liq-qty">
+        {p.liquidationQty || p.liquidation_qty || 0}
+      </div>
+    </div>
+  ))}
+</div>
         ) : (
           <div style={{ padding: "50px", textAlign: "center", color: "#94a3b8", fontSize: 15 }}>
             No product details available
