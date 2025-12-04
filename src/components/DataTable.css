@@ -1,6 +1,6 @@
 /* ==================================================== */
-/*       ULTIMATE FINAL DataTable.css (DEC 2025)        */
-/*       PERFECT CENTERING + FULL WIDTH + MOBILE PRO    */
+/*       FINAL PERFECT DataTable.css – DEC 2025         */
+/*       FAMILY HEADER FIXED + PERFECT ALIGNMENT        */
 /* ==================================================== */
 
 .table-wrapper {
@@ -15,7 +15,6 @@
 
 .table-card {
   min-width: 1100px;
-  border-radius: 16px;
   background: white;
 }
 
@@ -28,6 +27,7 @@
   line-height: 1.5;
 }
 
+/* Main Table Header */
 .modern-table thead {
   background: linear-gradient(135deg, #1b5e20, #2e7d32);
   color: white;
@@ -46,7 +46,6 @@
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
 }
 
 .modern-table th:nth-child(-n+6),
@@ -64,31 +63,22 @@
   background: #fafdfa;
 }
 
-/* ACTION BUTTONS */
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
+/* Action Buttons */
 .approve-btn,
 .edit-btn {
-  min-width: 130px !important;
-  width: 130px !important;
-  height: 48px !important;
-  padding: 0 16px !important;
+  min-width: 130px;
+  height: 48px;
   border: none;
   border-radius: 12px;
   font-weight: 700;
   font-size: 13.5px;
   cursor: pointer;
-  display: inline-flex !important;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
 .approve-btn {
@@ -99,7 +89,6 @@
 .approve-btn:hover {
   background: linear-gradient(135deg, #15803d, #16a34a);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
 }
 
 .edit-btn {
@@ -110,10 +99,9 @@
 .edit-btn:hover {
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
 }
 
-/* CUSTOM SCROLLBAR */
+/* Scrollbar */
 .table-wrapper::-webkit-scrollbar {
   height: 10px;
 }
@@ -133,7 +121,7 @@
 }
 
 /* ==================================================== */
-/*       EXPANDED PRODUCTS ROW — PERFECTLY CENTERED     */
+/*            EXPANDED PRODUCTS – PERFECT ALIGNMENT     */
 /* ==================================================== */
 
 .expanded-products-container {
@@ -146,70 +134,93 @@
 }
 
 .products-grid {
-  padding: 20px;
+  padding: 0;
+  /* Remove padding so header touches edges */
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
-/* GRID LAYOUT — PERFECT CENTERING */
+/* Header & Rows – Same grid, perfect alignment */
 .products-header,
 .product-row {
   display: grid;
-  grid-template-columns: 100px 1.8fr 1fr 0.9fr 0.9fr;
-  gap: 16px;
+  grid-template-columns: 130px 1.9fr 1fr 1fr 1fr;
+  /* Family | Product Name | SKU | Opening | Liq.Qty */
+  gap: 20px;
   align-items: center;
-  min-width: 720px;
-  text-align: center;           /* ← Center all text by default */
-  justify-items: center;        /* ← Center all content in cells */
+  justify-items: center;
+  min-width: 800px;
+  text-align: center;
+  justify-items: center;
+  padding: 16px 24px;
+  /* Same horizontal padding for header & rows */
 }
 
+/* HEADER – Exact same line, no wrapping */
 .products-header {
-  padding: 16px 0;
-  font-weight: 700;
-  font-size: 14.5px;
-  color: #1e293b;
-  border-bottom: 3px solid #93c5fd;
+  background: #eff6ff;
+  font-weight: 900;
+  font-size: 13.5px;
+  color: #1e40af;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1.4px;
+  border-bottom: 3px solid #3b82f6;
+  margin: 0;
+  padding: 18px 24px !important;
+  /* Force same padding */
 }
 
-.product-row {
-  padding: 16px 0;
-  border-bottom: 1px dashed #cbd5e1;
-  font-size: 15px;
+/* Force "PRODUCT FAMILY" to stay on one line */
+.products-header>div:nth-child(1) {
+  white-space: nowrap;
 }
 
-.product-row:last-child {
-  border-bottom: none;
-}
-
-/* Family Badge — Centered */
+/* FAMILY BADGE – Perfectly centered */
 .family-badge {
-  padding: 10px 16px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  border-radius: 50px;
   font-weight: 800;
   font-size: 12.5px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
+  min-width: 90px;
+  width: fit-content;
+  margin: 0 auto;
+  display: block;
 }
 
+/* Family Colors */
 .family-badge.biof,
-.family-badge.pbs    { background: #dbeafe; color: #1e40af; }
-.family-badge.wsf    { background: #fef3c7; color: #92400e; }
-.family-badge.mic    { background: #d1fae5; color: #065f46; }
-.family-badge.default { background: #e2e8f0; color: #475569; }
+.family-badge.pbs {
+  background: #dbeafe;
+  color: #1e40af;
+}
 
-/* Product Name — Only exception: left-aligned */
+.family-badge.wsf {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.family-badge.mic {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.family-badge.default {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Product Name – Left aligned only */
 .product-name {
   font-weight: 700;
-  color: #1e293b;
   font-size: 15.5px;
-  text-align: left !important;
-  justify-self: start !important;
-  padding-left: 8px;
+  color: #1e293b;
+  /* text-align: left !important;
+  justify-self: start !important; */
+  padding-left: 4px;
 }
 
-/* SKU, Opening, Liq.Qty — Perfectly centered */
+/* All numeric/text columns – Centered */
 .sku,
 .number,
 .liq-qty {
@@ -220,40 +231,53 @@
 .sku {
   font-family: 'Courier New', monospace;
   color: #64748b;
+  font-weight: 700;
+}
+
+.number {
+  color: #1e40af;
+  font-weight: 700;
 }
 
 .liq-qty {
-  font-weight: 900;
   color: #dc2626;
+  font-weight: 900;
   font-size: 17px;
 }
 
-/* MOBILE RESPONSIVE */
-@media (max-width: 768px) {
-  .table-card { min-width: 900px; }
-  .modern-table { font-size: 13.8px; }
-  .modern-table th,
-  .modern-table td { padding: 14px 10px; }
+/* Product Row Styling */
+.product-row {
+  background: white;
+  border-radius: 12px;
+  margin: 8px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-bottom: none !important;
+}
 
-  .approve-btn,
-  .edit-btn {
-    min-width: 110px !important;
-    width: 110px !important;
-    height: 44px !important;
-    font-size: 12.5px;
+/* ==================================================== */
+/*                   MOBILE RESPONSIVE                  */
+/* ==================================================== */
+
+@media (max-width: 768px) {
+  .table-card {
+    min-width: 900px;
   }
 
-  .products-grid { padding: 16px; }
-  
   .products-header,
   .product-row {
-    grid-template-columns: 90px 1.6fr 1fr 0.8fr 0.8fr;
-    gap: 12px;
-    font-size: 14px;
+    grid-template-columns: 110px 1.7fr 1fr 0.9fr 0.9fr;
+    gap: 14px;
+    padding: 14px 16px;
+    min-width: 700px;
   }
-  
+
   .family-badge {
-    padding: 8px 12px;
+    padding: 8px 14px;
     font-size: 11.5px;
+    min-width: 76px;
+  }
+
+  .product-name {
+    font-size: 14.8px;
   }
 }
