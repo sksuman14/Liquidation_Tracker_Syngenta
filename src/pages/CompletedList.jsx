@@ -1,4 +1,4 @@
-// src/pages/ApprovalDashboard.jsx → FINAL FIXED VERSION
+// src/pages/ApprovalDashboard.jsx → FINAL UPGRADED WITH FAMILY COLUMN + BEAUTIFUL UI
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DataTable from "../components/DataTable";
@@ -8,7 +8,6 @@ export default function ApprovalDashboard() {
   const [loading, setLoading] = useState(true);
   const [editingRecord, setEditingRecord] = useState(null);
 
-  // Edit form state (this is the fix!)
   const [editForm, setEditForm] = useState({
     employee_name: "",
     hq: "",
@@ -39,7 +38,7 @@ export default function ApprovalDashboard() {
       const data = await res.json();
       setRecords(data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -138,15 +137,26 @@ export default function ApprovalDashboard() {
       fully_approved: { text: "Fully Approved", color: "#7c3aed" }
     };
     const s = map[status] || { text: status, color: "#666" };
-    return <span style={{ background: s.color, color: "white", padding: "5px 10px", borderRadius: 20, fontSize: 11, fontWeight: "bold" }}>{s.text}</span>;
+    return (
+      <span style={{
+        background: s.color,
+        color: "white",
+        padding: "6px 12px",
+        borderRadius: 20,
+        fontSize: 11,
+        fontWeight: "bold"
+      }}>
+        {s.text}
+      </span>
+    );
   };
 
-  if (loading) return <DashboardLayout title="Approval Dashboard"><p>Loading...</p></DashboardLayout>;
+  if (loading) return <DashboardLayout title="Approval Dashboard"><p>Loading records...</p></DashboardLayout>;
 
   return (
     <DashboardLayout title="Liquidation Approval Dashboard">
       <div style={{ padding: 20 }}>
-        <h2 style={{ margin: 0 }}>All Records ({records.length})</h2>
+        <h2 style={{ margin: 0, fontSize: 28, color: "#1e293b" }}>All Records ({records.length})</h2>
         <p style={{ margin: "8px 0", color: "#64748b" }}>
           Logged in as: <strong>{currentUser}</strong> ({currentRole})
         </p>
@@ -162,74 +172,193 @@ export default function ApprovalDashboard() {
         />
       </div>
 
-      {/* FULL EDIT MODAL - NOW FIXED */}
+      {/* FULL EDIT MODAL - UPGRADED WITH FAMILY COLUMN */}
       {editingRecord && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999
+          background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999
         }}>
-          <div style={{ background: "white", borderRadius: 12, width: "90%", maxWidth: "1000px", maxHeight: "90vh", overflow: "auto", padding: 30 }}>
-            <h3>Edit Record - {editingRecord.phone_number}</h3>
+          <div style={{
+            background: "white",
+            borderRadius: 16,
+            width: "95%",
+            maxWidth: "1200px",
+            maxHeight: "92vh",
+            overflow: "auto",
+            padding: 32,
+            boxShadow: "0 25px 50px rgba(0,0,0,0.25)"
+          }}>
+            <h3 style={{ margin: "0 0 24px 0", fontSize: 26, color: "#1e293b" }}>
+              Edit Record → {editingRecord.phone_number}
+            </h3>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15, marginBottom: 20 }}>
-              <input placeholder="Employee Name" value={editForm.employee_name} onChange={(e) => setEditForm({...editForm, employee_name: e.target.value})} style={{ padding: 10 }} />
-              <input placeholder="HQ" value={editForm.hq} onChange={(e) => setEditForm({...editForm, hq: e.target.value})} style={{ padding: 10 }} />
-              <input placeholder="Zone" value={editForm.zone} onChange={(e) => setEditForm({...editForm, zone: e.target.value})} style={{ padding: 10 }} />
-              <input placeholder="Area" value={editForm.area} onChange={(e) => setEditForm({...editForm, area: e.target.value})} style={{ padding: 10 }} />
+            {/* Employee Details */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
+              <input placeholder="Employee Name" value={editForm.employee_name} onChange={(e) => setEditForm({...editForm, employee_name: e.target.value})} style={{ padding: 14, borderRadius: 10, border: "1px solid #cbd5e1", fontSize: 15 }} />
+              <input placeholder="HQ" value={editForm.hq} onChange={(e) => setEditForm({...editForm, hq: e.target.value})} style={{ padding: 14, borderRadius: 10, border: "1px solid #cbd5e1", fontSize: 15 }} />
+              <input placeholder="Zone" value={editForm.zone} onChange={(e) => setEditForm({...editForm, zone: e.target.value})} style={{ padding: 14, borderRadius: 10, border: "1px solid #cbd5e1", fontSize: 15 }} />
+              <input placeholder="Area" value={editForm.area} onChange={(e) => setEditForm({...editForm, area: e.target.value})} style={{ padding: 14, borderRadius: 10, border: "1px solid #cbd5e1", fontSize: 15 }} />
             </div>
 
-            <h4>Products</h4>
-            <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 15 }}>
-              <thead>
-                <tr style={{ background: "#f1f5f9" }}>
-                  
-                  <th style={{ padding: 10 }}>Product Name</th>
-                  <th style={{ padding: 10 }}>SKU</th>
-                  <th style={{ padding: 10 }}>Opening</th>
-                  <th style={{ padding: 10 }}>Liq. Qty</th>
-                  <th style={{ padding: 10 }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {editForm.products.map((p, i) => (
-                  <tr key={i}>
-                   
-                    <td><input value={p.productName || ""} onChange={(e) => {
-                      const newProducts = [...editForm.products];
-                      newProducts[i].productName = e.target.value;
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ width: "100%", padding: 8 }} /></td>
-                     <td><input value={p.sku || ""} onChange={(e) => {
-                      const newProducts = [...editForm.products];
-                      newProducts[i].sku = e.target.value;
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ width: "100%", padding: 8 }} /></td>
-                    <td><input type="number" value={p.openingStock || 0} onChange={(e) => {
-                      const newProducts = [...editForm.products];
-                      newProducts[i].openingStock = Number(e.target.value);
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ width: "100%", padding: 8 }} /></td>
-                    <td><input type="number" value={p.liquidationQty || 0} onChange={(e) => {
-                      const newProducts = [...editForm.products];
-                      newProducts[i].liquidationQty = Number(e.target.value);
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ width: "100%", padding: 8 }} /></td>
-                    <td><button onClick={() => {
-                      const newProducts = editForm.products.filter((_, idx) => idx !== i);
-                      setEditForm({...editForm, products: newProducts});
-                    }} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 10px" }}>Remove</button></td>
+            {/* Products Table - FAMILY FIRST */}
+            <h4 style={{ margin: "24px 0 16px 0", color: "#ea580c", fontSize: 20 }}>Products</h4>
+            <div style={{ border: "2px solid #e2e8f0", borderRadius: 14, overflow: "hidden", marginBottom: 20 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead style={{ background: "#0f172a", color: "white" }}>
+                  <tr>
+                    <th style={{ padding: "16px", textAlign: "left" }}>Family</th>
+                    <th style={{ padding: "16px", textAlign: "left" }}>Product Name</th>
+                    <th style={{ padding: "16px", textAlign: "left" }}>SKU</th>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Opening Stock</th>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Liq. Qty</th>
+                    <th style={{ padding: "16px", textAlign: "center" }}>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {editForm.products.map((p, i) => (
+                    <tr key={i} style={{ background: i % 2 === 0 ? "#f8fafc" : "white", borderBottom: "1px solid #e2e8f0" }}>
+                      <td style={{ padding: "12px" }}>
+                        <input
+                          value={p.family || ""}
+                          onChange={(e) => {
+                            const np = [...editForm.products];
+                            np[i].family = e.target.value;
+                            setEditForm({ ...editForm, products: np });
+                          }}
+                          placeholder="PBS / WSF / MIC"
+                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #94a3b8", fontWeight: "500" }}
+                        />
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <input
+                          value={p.productName || ""}
+                          onChange={(e) => {
+                            const np = [...editForm.products];
+                            np[i].productName = e.target.value;
+                            setEditForm({ ...editForm, products: np });
+                          }}
+                          placeholder="VIVA, RADIFARM"
+                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #94a3b8" }}
+                        />
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <input
+                          value={p.sku || ""}
+                          onChange={(e) => {
+                            const np = [...editForm.products];
+                            np[i].sku = e.target.value;
+                            setEditForm({ ...editForm, products: np });
+                          }}
+                          placeholder="5 L, 10 Kg"
+                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #94a3b8" }}
+                        />
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <input
+                          type="number"
+                          value={p.openingStock || ""}
+                          onChange={(e) => {
+                            const np = [...editForm.products];
+                            np[i].openingStock = e.target.value === "" ? "" : Number(e.target.value);
+                            setEditForm({ ...editForm, products: np });
+                          }}
+                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #94a3b8", textAlign: "center" }}
+                        />
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <input
+                          type="number"
+                          value={p.liquidationQty || ""}
+                          onChange={(e) => {
+                            const np = [...editForm.products];
+                            np[i].liquidationQty = e.target.value === "" ? "" : Number(e.target.value);
+                            setEditForm({ ...editForm, products: np });
+                          }}
+                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #94a3b8", textAlign: "center" }}
+                        />
+                      </td>
+                      <td style={{ padding: "12px", textAlign: "center" }}>
+                        <button
+                          onClick={() => setEditForm({
+                            ...editForm,
+                            products: editForm.products.filter((_, idx) => idx !== i)
+                          })}
+                          style={{
+                            background: "#dc2626",
+                            color: "white",
+                            border: "none",
+                            padding: "10px 16px",
+                            borderRadius: 8,
+                            fontWeight: "bold",
+                            cursor: "pointer"
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          
+            {/* Add New Product Button */}
+            <button
+              onClick={() => setEditForm({
+                ...editForm,
+                products: [...editForm.products, {
+                  family: "",
+                  productName: "",
+                  sku: "",
+                  openingStock: "",
+                  liquidationQty: ""
+                }]
+              })}
+              style={{
+                padding: "14px 32px",
+                background: "#ea580c",
+                color: "white",
+                border: "none",
+                borderRadius: 12,
+                fontWeight: "bold",
+                fontSize: 16,
+                marginBottom: 28,
+                cursor: "pointer"
+              }}
+            >
+              + Add New Product
+            </button>
 
-            <div style={{ marginTop: 20, textAlign: "right" }}>
-              <button onClick={saveFullEdit} style={{ background: "#059669", color: "white", padding: "12px 24px", border: "none", borderRadius: 8, marginRight: 10 }}>
+            {/* Save / Cancel Buttons */}
+            <div style={{ textAlign: "right" }}>
+              <button
+                onClick={saveFullEdit}
+                style={{
+                  padding: "16px 40px",
+                  background: "#059669",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 12,
+                  fontSize: 17,
+                  fontWeight: "bold",
+                  marginRight: 16,
+                  cursor: "pointer"
+                }}
+              >
                 Save All Changes
               </button>
-              <button onClick={() => setEditingRecord(null)} style={{ background: "#64748b", color: "white", padding: "12px 24px", border: "none", borderRadius: 8 }}>
+              <button
+                onClick={() => setEditingRecord(null)}
+                style={{
+                  padding: "16px 40px",
+                  background: "#64748b",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 12,
+                  fontSize: 17,
+                  cursor: "pointer"
+                }}
+              >
                 Cancel
               </button>
             </div>
