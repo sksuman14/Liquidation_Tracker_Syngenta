@@ -151,7 +151,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* GRID LAYOUT — PERFECT CENTERING */
+/* ==================================================== */
+/*       FINAL FIX: PRODUCT NAME PERFECTLY ALIGNED       */
+/* ==================================================== */
+
 .products-header,
 .product-row {
   display: grid;
@@ -159,8 +162,8 @@
   gap: 16px;
   align-items: center;
   min-width: 720px;
-  text-align: center;           /* ← Center all text by default */
-  justify-items: center;        /* ← Center all content in cells */
+  text-align: center;
+  justify-items: center;         /* All cells centered by default */
 }
 
 .products-header {
@@ -183,7 +186,7 @@
   border-bottom: none;
 }
 
-/* Family Badge — Centered */
+/* FAMILY BADGE — stays centered */
 .family-badge {
   padding: 10px 16px;
   border-radius: 12px;
@@ -199,14 +202,15 @@
 .family-badge.mic    { background: #d1fae5; color: #065f46; }
 .family-badge.default { background: #e2e8f0; color: #475569; }
 
-/* Product Name — Only exception: left-aligned */
+/* PRODUCT NAME — LEFT-ALIGNED BUT STILL UNDER ITS HEADER */
 .product-name {
   font-weight: 700;
   color: #1e293b;
   font-size: 15.5px;
-  text-align: left !important;
-  justify-self: start !important;
-  padding-left: 8px;
+  text-align: left;           /* Text is left-aligned */
+  justify-self: start;        /* Stays in correct column */
+  width: 100%;                /* Takes full width of its grid cell */
+  padding-left: 12px;         /* Slight indent for beauty */
 }
 
 /* SKU, Opening, Liq.Qty — Perfectly centered */
