@@ -53,9 +53,9 @@ export default function CM() {
   );
 
   return (
-    <DashboardLayout title="CM - Finalized Records Dashboard">
-      <div style={{ padding: 32 }}>
-        <div style={{ marginBottom: 32, textAlign: "center" }}>
+    <DashboardLayout >
+      <div style={{ }}>
+        <div style={{ textAlign: "center" }}>
           <h1 style={{ 
             fontSize: 36, 
             color: "#166534", 
