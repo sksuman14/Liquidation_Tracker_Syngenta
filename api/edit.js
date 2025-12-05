@@ -15,6 +15,11 @@ export default async function handler(req, res) {
 
   const { phone_number, record_date, role, username, ...updates } = req.body;
 
+  // Force only valid roles
+  const validRoles = ["TSM", "AM", "ZM", "NSM"];
+  const safeRole = validRoles.includes(role) ? role : "NSM";
+  const editorTag = `${username} (${safeRole})`;
+
   try {
     const findRecord = await pool.query(
       `SELECT status FROM complete_records WHERE phone_number = $1 AND record_date = $2 LIMIT 1`, 
@@ -26,7 +31,7 @@ export default async function handler(req, res) {
     }
 
     if (findRecord.rows[0].status === "fully_approved") {
-      return res.status(400).json({ error: "Cannot edit fully approved" });
+      return res.status(400).json({ error: "Cannot edit fully approved record" });
     }
 
     const allowed = ["employee_name", "hq", "zone", "area", "products"];
@@ -43,15 +48,20 @@ export default async function handler(req, res) {
       .filter(k => allowed.includes(k))
       .map(k => Array.isArray(updates[k]) ? JSON.stringify(updates[k]) : updates[k]);
 
-    const query = `UPDATE complete_records 
-                   SET ${fields}, edited_by = $${values.length + 1}, edited_at = NOW()
-                   WHERE phone_number = $${values.length + 2} AND record_date = $${values.length + 3} 
-                   RETURNING *`;
+    const query = `
+      UPDATE complete_records 
+      SET ${fields}, 
+          edited_by = $${values.length + 1}, 
+          edited_at = NOW()
+      WHERE phone_number = $${values.length + 2} 
+        AND record_date = $${values.length + 3}
+      RETURNING *
+    `;
 
     const result = await pool.query(query, [
-      ...values, 
-      `${username} (${role})`, 
-      phone_number, 
+      ...values,
+      editorTag,           // ← always clean: "John (NSM)", never CM/TA
+      phone_number,
       record_date
     ]);
 

@@ -1,10 +1,11 @@
-// src/pages/TSM.jsx → FINAL PERFECTION WITH + ADD PRODUCT BUTTON (2025)
+// src/pages/TSM.jsx → FINAL 2025: Pending on Top + Approved at Bottom (Never Disappears)
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DataTable from "../components/DataTable";
 
 export default function TSM() {
-  const [data, setData] = useState([]);
+  const [pending, setPending] = useState([]);      // Needs your approval
+  const [approved, setApproved] = useState([]);    // Already approved by you
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -20,9 +21,17 @@ export default function TSM() {
       if (!response.ok) throw new Error("Failed to fetch records");
 
       const result = await response.json();
-      const tsmPending = result.filter(record => record.status === "pending_tsm");
 
-      setData(tsmPending);
+      // Split records: Pending your approval vs Already approved by you
+      const pendingTSM = result.filter(r => 
+        r.status === "pending_ta" || r.status === "pending_tsm"
+      );
+      const approvedByYou = result.filter(r => 
+        r.status === "approved_by_tsm"
+      );
+
+      setPending(pendingTSM);
+      setApproved(approvedByYou);
     } catch (err) {
       setError("Failed to load TSM dashboard. Is server running?");
       console.error(err);
@@ -114,290 +123,329 @@ export default function TSM() {
     return () => clearInterval(interval);
   }, []);
 
-  const getStatusBadge = () => (
-    <span style={{
-      background: "#f59e0b",
-      color: "white",
-      padding: "10px 22px",
-      borderRadius: 40,
-      fontWeight: "bold",
-      fontSize: 13,
-      boxShadow: "0 6px 20px rgba(245,158,11,0.3)"
-    }}>
-      PENDING TSM APPROVAL
-    </span>
-  );
+  const getStatusBadge = (status) => {
+    if (status === "approved_by_tsm") {
+      return (
+        <span style={{
+          background: "#10b981",
+          color: "white",
+          padding: "10px 22px",
+          borderRadius: 40,
+          fontWeight: "bold",
+          fontSize: 13,
+        }}>
+          APPROVED BY YOU
+        </span>
+      );
+    }
+    return (
+      <span style={{
+        background: "#f59e0b",
+        color: "white",
+        padding: "10px 22px",
+        borderRadius: 40,
+        fontWeight: "bold",
+        fontSize: 13,
+        boxShadow: "0 6px 20px rgba(245,158,11,0.3)"
+      }}>
+        PENDING YOUR APPROVAL
+      </span>
+    );
+  };
 
   return (
     <DashboardLayout title="TSM - Territory Sales Manager Dashboard">
-      <div style={{ padding: 28 }}>
-        <h2 style={{ color: "#d97706", fontSize: 30, marginBottom: 8 }}>
-          Pending TSM Approval ({data.length})
-        </h2>
-        <p style={{ color: "#666", marginBottom: 32, fontSize: 16 }}>
-          <strong>{currentUser}</strong> — Review records approved by TA
-        </p>
+      <div style={{  }}>
 
-        {loading && (
-          <div style={{ textAlign: "center", padding: 100, color: "#94a3b8" }}>
-            Loading TSM requests...
-          </div>
+        {/* PENDING APPROVAL SECTION */}
+        <section style={{ marginBottom: 60 }}>
+          <h2 style={{ color: "#d97706", fontSize: 24, marginBottom: 16 }}>
+            Pending Your Approval ({pending.length})
+          </h2>
+
+          {loading && (
+            <div style={{ textAlign: "center", padding: 100, color: "#94a3b8" }}>
+              Loading TSM requests...
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              background: "#fee2e2",
+              color: "#991b1b",
+              padding: 16,
+              borderRadius: 12,
+              marginBottom: 20,
+              textAlign: "center"
+            }}>
+              {error}
+              <button onClick={fetchRequests} style={{ marginLeft: 12, padding: "8px 16px", background: "#dc2626", color: "white", border: "none", borderRadius: 6 }}>
+                Retry
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && pending.length === 0 && (
+            <div style={{
+              textAlign: "center",
+              padding: 130,
+              background: "#fffbeb",
+              borderRadius: 24,
+              color: "#92400e",
+              fontSize: 24,
+              fontWeight: "bold"
+            }}>
+              No records pending your approval
+            </div>
+          )}
+
+          {!loading && !error && pending.length > 0 && (
+            <DataTable
+              data={pending}
+              showActions={true}
+              onApprove={handleApprove}
+              onEdit={openEditModal}
+              canApprove={() => true}
+              canEdit={() => true}
+              currentRole="TSM"
+              currentUser={currentUser}
+              getStatusBadge={getStatusBadge}
+            />
+          )}
+        </section>
+
+        {/* APPROVED BY YOU SECTION */}
+        {approved.length > 0 && (
+          <section>
+            <div style={{
+              borderTop: "3px solid #e2e8f0",
+              paddingTop: 10,
+              marginTop: 40
+            }}>
+              <h2 style={{ color: "#059669", fontSize: 26, marginBottom: 20 }}>
+                Approved by You → Sent to AM ({approved.length})
+              </h2>
+              <p style={{ color: "#64748b", marginBottom: 24, fontSize: 15 }}>
+                These records have been approved by you and are now awaiting AM approval.
+              </p>
+
+              <DataTable
+                data={approved}
+                showActions={false}
+                getStatusBadge={getStatusBadge}
+              />
+            </div>
+          </section>
         )}
 
-        {error && (
+        {/* FULLY ALIGNED & GORGEOUS EDIT MODAL */}
+        {editingRecord && (
           <div style={{
-            background: "#fee2e2",
-            color: "#991b1b",
-            padding: 16,
-            borderRadius: 12,
-            marginBottom: 20,
-            textAlign: "center"
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.9)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 9999,
+            padding: 20
           }}>
-            {error}
-            <button onClick={fetchRequests} style={{ marginLeft: 12, padding: "8px 16px", background: "#dc2626", color: "white", border: "none", borderRadius: 6 }}>
-              Retry
-            </button>
-          </div>
-        )}
+            <div style={{
+              background: "white",
+              borderRadius: 20,
+              width: "100%",
+              maxWidth: "1200px",
+              maxHeight: "92vh",
+              overflow: "auto",
+              padding: 40,
+              boxShadow: "0 30px 80px rgba(0,0,0,0.5)"
+            }}>
+              <h3 style={{ margin: "0 0 32px 0", fontSize: 28, color: "#1e293b" }}>
+                Edit Record → {editingRecord.phone_number}
+              </h3>
 
-        {!loading && !error && data.length === 0 && (
-          <div style={{
-            textAlign: "center",
-            padding: 130,
-            background: "#fffbeb",
-            borderRadius: 24,
-            color: "#92400e",
-            fontSize: 24,
-            fontWeight: "bold"
-          }}>
-            No records pending TSM approval
-          </div>
-        )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
+                <input
+                  placeholder="Employee Name"
+                  value={editForm.employee_name}
+                  onChange={e => setEditForm({ ...editForm, employee_name: e.target.value })}
+                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
+                />
+                <input
+                  placeholder="HQ"
+                  value={editForm.hq}
+                  onChange={e => setEditForm({ ...editForm, hq: e.target.value })}
+                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
+                />
+                <input
+                  placeholder="Zone"
+                  value={editForm.zone}
+                  onChange={e => setEditForm({ ...editForm, zone: e.target.value })}
+                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
+                />
+                <input
+                  placeholder="Area"
+                  value={editForm.area}
+                  onChange={e => setEditForm({ ...editForm, area: e.target.value })}
+                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
+                />
+              </div>
 
-        {!loading && !error && data.length > 0 && (
-          <DataTable
-            data={data}
-            showActions={true}
-            onApprove={handleApprove}
-            onEdit={openEditModal}
-            canApprove={() => true}
-            canEdit={() => true}
-            currentRole="TSM"
-            currentUser={currentUser}
-            getStatusBadge={getStatusBadge}
-          />
+              <h4 style={{ margin: "28px 0 16px 0", color: "#d97706" }}>Products</h4>
+              <div style={{ border: "1px solid #e2e8f0", borderRadius: 16, overflow: "hidden", marginBottom: 28 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead style={{ background: "#fed7aa" }}>
+                    <tr>
+                      <th style={{ padding: "18px", textAlign: "left" }}>Product Family</th>
+                      <th style={{ padding: "18px", textAlign: "left" }}>Product Name</th>
+                      <th style={{ padding: "18px", textAlign: "left" }}>SKU</th>
+                      <th style={{ padding: "18px", textAlign: "center" }}>Opening Stock</th>
+                      <th style={{ padding: "18px", textAlign: "center" }}>Liq. Qty</th>
+                      <th style={{ padding: "18px", textAlign: "center", width: 130 }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {editForm.products.map((p, i) => (
+                      <tr key={i} style={{ borderBottom: i !== editForm.products.length - 1 ? "1px solid #e2e8f0" : "none" }}>
+                        <td style={{ padding: "14px" }}>
+                          <input
+                            value={p.family || ""}
+                            onChange={e => {
+                              const np = [...editForm.products];
+                              np[i].family = e.target.value;
+                              setEditForm({ ...editForm, products: np });
+                            }}
+                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
+                          />
+                        </td>
+                        <td style={{ padding: "14px" }}>
+                          <input
+                            value={p.productName || p.product_name || ""}
+                            onChange={e => {
+                              const np = [...editForm.products];
+                              np[i].productName = e.target.value;
+                              setEditForm({ ...editForm, products: np });
+                            }}
+                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
+                          />
+                        </td>
+                        <td style={{ padding: "14px" }}>
+                          <input
+                            value={p.sku || ""}
+                            onChange={e => {
+                              const np = [...editForm.products];
+                              np[i].sku = e.target.value;
+                              setEditForm({ ...editForm, products: np });
+                            }}
+                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
+                          />
+                        </td>
+                        <td style={{ padding: "14px" }}>
+                          <input
+                            type="number"
+                            value={p.openingStock || p.opening_qty || 0}
+                            onChange={e => {
+                              const np = [...editForm.products];
+                              np[i].openingStock = Number(e.target.value);
+                              setEditForm({ ...editForm, products: np });
+                            }}
+                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
+                          />
+                        </td>
+                        <td style={{ padding: "14px" }}>
+                          <input
+                            type="number"
+                            value={p.liquidationQty || p.liquidation_qty || 0}
+                            onChange={e => {
+                              const np = [...editForm.products];
+                              np[i].liquidationQty = Number(e.target.value);
+                              setEditForm({ ...editForm, products: np });
+                            }}
+                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
+                          />
+                        </td>
+                        <td style={{ padding: "14px", textAlign: "center" }}>
+                          <button
+                            onClick={() => setEditForm({
+                              ...editForm,
+                              products: editForm.products.filter((_, idx) => idx !== i)
+                            })}
+                            style={{
+                              background: "#dc2626",
+                              color: "white",
+                              border: "none",
+                              padding: "12px 20px",
+                              borderRadius: 10,
+                              fontWeight: "bold",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <button
+                onClick={() => setEditForm({
+                  ...editForm,
+                  products: [...editForm.products, {
+                    family: "",
+                    productName: "",
+                    sku: "",
+                    openingStock: 0,
+                    liquidationQty: 0
+                  }]
+                })}
+                style={{
+                  padding: "16px 32px",
+                  background: "#ea580c",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 14,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                  marginBottom: 32,
+                  cursor: "pointer"
+                }}
+              >
+                + Add Product
+              </button>
+
+              <div style={{ textAlign: "right" }}>
+                <button
+                  onClick={saveEdit}
+                  style={{
+                    padding: "18px 44px",
+                    background: "#059669",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 14,
+                    fontSize: 17,
+                    fontWeight: "bold",
+                    marginRight: 16
+                  }}
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setEditingRecord(null)}
+                  style={{
+                    padding: "18px 44px",
+                    background: "#64748b",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 14,
+                    fontSize: 17
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* FULLY ALIGNED & GORGEOUS EDIT MODAL */}
-      {editingRecord && (
-        <div style={{
-          position: "fixed", inset: 0,
-          background: "rgba(0,0,0,0.9)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 9999,
-          padding: 20
-        }}>
-          <div style={{
-            background: "white",
-            borderRadius: 20,
-            width: "100%",
-            maxWidth: "1200px",
-            maxHeight: "92vh",
-            overflow: "auto",
-            padding: 40,
-            boxShadow: "0 30px 80px rgba(0,0,0,0.5)"
-          }}>
-            <h3 style={{ margin: "0 0 32px 0", fontSize: 28, color: "#1e293b" }}>
-              Edit Record → {editingRecord.phone_number}
-            </h3>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
-              <input
-                placeholder="Employee Name"
-                value={editForm.employee_name}
-                onChange={e => setEditForm({ ...editForm, employee_name: e.target.value })}
-                style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-              />
-              <input
-                placeholder="HQ"
-                value={editForm.hq}
-                onChange={e => setEditForm({ ...editForm, hq: e.target.value })}
-                style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-              />
-              <input
-                placeholder="Zone"
-                value={editForm.zone}
-                onChange={e => setEditForm({ ...editForm, zone: e.target.value })}
-                style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-              />
-              <input
-                placeholder="Area"
-                value={editForm.area}
-                onChange={e => setEditForm({ ...editForm, area: e.target.value })}
-                style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-              />
-            </div>
-
-            <h4 style={{ margin: "28px 0 16px 0", color: "#d97706" }}>Products</h4>
-            <div style={{ border: "1px solid #e2e8f0", borderRadius: 16, overflow: "hidden", marginBottom: 28 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead style={{ background: "#fed7aa" }}>
-                  <tr>
-                     <th style={{ padding: "18px", textAlign: "left" }}>Product Family</th>
-                    <th style={{ padding: "18px", textAlign: "left" }}>Product Name</th>
-                    <th style={{ padding: "18px", textAlign: "left" }}>SKU</th>
-                    <th style={{ padding: "18px", textAlign: "center" }}>Opening Stock</th>
-                    <th style={{ padding: "18px", textAlign: "center" }}>Liq. Qty</th>
-                    <th style={{ padding: "18px", textAlign: "center", width: 130 }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {editForm.products.map((p, i) => (
-                    <tr key={i} style={{ borderBottom: i !== editForm.products.length - 1 ? "1px solid #e2e8f0" : "none" }}>
-                        {/* FAMILY */}
-                      <td style={{ padding: "14px" }}>
-                        <input
-                          value={p.family || ""}
-                          onChange={e => {
-                            const np = [...editForm.products];
-                            np[i].family = e.target.value;
-                            setEditForm({ ...editForm, products: np });
-                          }}
-
-                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                        />
-                      </td>
-                      <td style={{ padding: "14px" }}>
-                        <input
-                          value={p.productName || p.product_name || ""}
-                          onChange={e => {
-                            const np = [...editForm.products];
-                            np[i].productName = e.target.value;
-                            setEditForm({ ...editForm, products: np });
-                          }}
-                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                        />
-                      </td>
-                      <td style={{ padding: "14px" }}>
-                        <input
-                          value={p.sku || ""}
-                          onChange={e => {
-                            const np = [...editForm.products];
-                            np[i].sku = e.target.value;
-                            setEditForm({ ...editForm, products: np });
-                          }}
-                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                        />
-                      </td>
-                      <td style={{ padding: "14px" }}>
-                        <input
-                          type="number"
-                          value={p.openingStock || p.opening_qty || 0}
-                          onChange={e => {
-                            const np = [...editForm.products];
-                            np[i].openingStock = Number(e.target.value);
-                            setEditForm({ ...editForm, products: np });
-                          }}
-                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                        />
-                      </td>
-                      <td style={{ padding: "14px" }}>
-                        <input
-                          type="number"
-                          value={p.liquidationQty || p.liquidation_qty || 0}
-                          onChange={e => {
-                            const np = [...editForm.products];
-                            np[i].liquidationQty = Number(e.target.value);
-                            setEditForm({ ...editForm, products: np });
-                          }}
-                          style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                        />
-                      </td>
-                      <td style={{ padding: "14px", textAlign: "center" }}>
-                        <button
-                          onClick={() => setEditForm({
-                            ...editForm,
-                            products: editForm.products.filter((_, idx) => idx !== i)
-                          })}
-                          style={{
-                            background: "#dc2626",
-                            color: "white",
-                            border: "none",
-                            padding: "12px 20px",
-                            borderRadius: 10,
-                            fontWeight: "bold",
-                            cursor: "pointer"
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* + ADD PRODUCT BUTTON */}
-            <button
-              onClick={() => setEditForm({
-                ...editForm,
-                products: [...editForm.products, {
-                  sku: "",
-                  productName: "",
-                  openingStock: 0,
-                  liquidationQty: 0
-                }]
-              })}
-              style={{
-                padding: "16px 32px",
-                background: "#ea580c",
-                color: "white",
-                border: "none",
-                borderRadius: 14,
-                fontWeight: "bold",
-                fontSize: 16,
-                marginBottom: 32,
-                cursor: "pointer"
-              }}
-            >
-              + Add Product
-            </button>
-
-            <div style={{ textAlign: "right" }}>
-              <button
-                onClick={saveEdit}
-                style={{
-                  padding: "18px 44px",
-                  background: "#059669",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 14,
-                  fontSize: 17,
-                  fontWeight: "bold",
-                  marginRight: 16
-                }}
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={() => setEditingRecord(null)}
-                style={{
-                  padding: "18px 44px",
-                  background: "#64748b",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 14,
-                  fontSize: 17
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   );
 }
