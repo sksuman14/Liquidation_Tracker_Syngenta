@@ -195,7 +195,7 @@ export default function TSM() {
               fontSize: 24,
               fontWeight: "bold"
             }}>
-              No records pending your approval
+              No records pending for your approval
             </div>
           )}
 
