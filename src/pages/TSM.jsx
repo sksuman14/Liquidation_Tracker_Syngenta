@@ -20,7 +20,7 @@ export default function TSM() {
       if (!response.ok) throw new Error("Failed to fetch records");
 
       const result = await response.json();
-      const tsmPending = result.filter(record => record.status === "pending_ta");
+      const tsmPending = result.filter(record => record.status === "pending_tsm");
 
       setData(tsmPending);
     } catch (err) {
