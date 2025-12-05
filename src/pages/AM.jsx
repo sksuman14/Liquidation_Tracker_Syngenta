@@ -21,8 +21,13 @@ export default function AM() {
       const allRecords = await response.json();
 
       // Split: Pending AM vs Already approved by AM
-      const pendingAM = allRecords.filter(record => record.status === "approved_by_tsm");
-      const approvedByYou = allRecords.filter(record => record.status === "approved_by_am");
+    // Pending your approval (ZM approved, waiting for NSM)
+const pendingAM = allRecords.filter(record => record.status === "approved_by_tsm");
+
+// Already approved by YOU (NSM) — stay forever, even if fully_approved
+const approvedByYou = allRecords.filter(record => 
+  (record.approved_by || []).some(tag => tag.includes("(AM)"))
+);
 
       setPending(pendingAM);
       setApproved(approvedByYou);

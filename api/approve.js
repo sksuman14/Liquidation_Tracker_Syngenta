@@ -75,7 +75,7 @@ export default async function handler(req, res) {
       SET 
         status = $1,
         approved_by = array_append(approved_by, $2),
-        edited_by = $3,
+      
         edited_at = NOW()
       WHERE phone_number = $4 AND record_date = $5
       RETURNING *

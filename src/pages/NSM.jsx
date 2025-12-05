@@ -21,8 +21,13 @@ export default function NSM() {
       const allRecords = await response.json();
 
       // Split: Pending NSM vs Already approved by NSM
-      const pendingNSM = allRecords.filter(record => record.status === "approved_by_zm");
-      const approvedByYou = allRecords.filter(record => record.status === "approved_by_nsm");
+    // Pending your approval (ZM approved, waiting for NSM)
+const pendingNSM = allRecords.filter(record => record.status === "approved_by_zm");
+
+// Already approved by YOU (NSM) — stay forever, even if fully_approved
+const approvedByYou = allRecords.filter(record => 
+  (record.approved_by || []).some(tag => tag.includes("(NSM)"))
+);
 
       setPending(pendingNSM);
       setApproved(approvedByYou);
@@ -158,7 +163,7 @@ export default function NSM() {
             Pending Your Approval ({pending.length})
           </h2>
           <p style={{ color: "#666", marginBottom: 32, fontSize: 16 }}>
-            <strong>{currentUser}</strong> — Final review before CM approval
+            <strong>{currentUser}</strong> — Final approval
           </p>
 
           {loading && (

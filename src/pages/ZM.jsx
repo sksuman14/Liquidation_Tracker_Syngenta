@@ -21,8 +21,13 @@ export default function ZM() {
       const allRecords = await response.json();
 
       // Split: Pending ZM vs Already approved by ZM
-      const pendingZM = allRecords.filter(record => record.status === "approved_by_am");
-      const approvedByYou = allRecords.filter(record => record.status === "approved_by_zm");
+    // Pending your approval (ZM approved, waiting for NSM)
+const pendingZM = allRecords.filter(record => record.status === "approved_by_am");
+
+// Already approved by YOU (NSM) — stay forever, even if fully_approved
+const approvedByYou = allRecords.filter(record => 
+  (record.approved_by || []).some(tag => tag.includes("(ZM)"))
+);
 
       setPending(pendingZM);
       setApproved(approvedByYou);

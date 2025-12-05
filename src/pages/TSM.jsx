@@ -26,9 +26,9 @@ export default function TSM() {
       const pendingTSM = result.filter(r => 
         r.status === "pending_ta" || r.status === "pending_tsm"
       );
-      const approvedByYou = result.filter(r => 
-        r.status === "approved_by_tsm"
-      );
+     const approvedByYou = result.filter(r => 
+  (r.approved_by || []).some(tag => tag.includes("(TSM)"))
+);
 
       setPending(pendingTSM);
       setApproved(approvedByYou);
