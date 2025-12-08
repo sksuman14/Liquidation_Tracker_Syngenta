@@ -18,8 +18,8 @@ export default function Login() {
     if (found) {
       localStorage.setItem("userName", found.name);
       localStorage.setItem("userRole", found.role);
+      localStorage.setItem("userMobile", found.mobile); // NEW: For hierarchy filtering
       navigate("/dashboard", { replace: true });
-
     } else {
       setError("Invalid email or mobile number");
     }

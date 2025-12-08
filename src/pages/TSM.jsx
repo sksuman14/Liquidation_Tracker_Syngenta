@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DataTable from "../components/DataTable";
+import { getSubordinateTAMobiles } from "../data/hierarchy";
 
 export default function TSM() {
   const [pending, setPending] = useState([]);      // Needs your approval
@@ -9,32 +10,37 @@ export default function TSM() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const currentUser = localStorage.getItem("username") || "TSM User";
-  localStorage.setItem("userRole", "TSM");
-  const currentRole = "TSM";
+  const currentUser = localStorage.getItem("userName") || "TSM";
+  const currentRole = localStorage.getItem("userRole") || "TSM";
+  const userMobile = localStorage.getItem("userMobile");
 
   const fetchRequests = async () => {
     try {
       setLoading(true);
       setError("");
-      const response = await fetch("/api/completed");
-      if (!response.ok) throw new Error("Failed to fetch records");
+      const res = await fetch("/api/completed");
+      if (!res.ok) throw new Error("Server error");
 
-      const result = await response.json();
+      const allRecords = await res.json();
 
-      // Split records: Pending your approval vs Already approved by you
-      const pendingTSM = result.filter(r => 
+      const allowedTAs = getSubordinateTAMobiles(userMobile, currentRole);
+      const myRecords = allRecords.filter(r =>
+        r.phone_number && allowedTAs.includes(r.phone_number)
+      );
+
+      const pendingList = myRecords.filter(r =>
         r.status === "pending_ta" || r.status === "pending_tsm"
       );
-     const approvedByYou = result.filter(r => 
-  (r.approved_by || []).some(tag => tag.includes("(TSM)"))
-);
 
-      setPending(pendingTSM);
-      setApproved(approvedByYou);
+      const approvedByMe = myRecords.filter(r =>
+        (r.approved_by || []).some(tag => tag.includes("(TSM)"))
+      );
+
+      setPending(pendingList);
+      setApproved(approvedByMe);
     } catch (err) {
-      setError("Failed to load TSM dashboard. Is server running?");
       console.error(err);
+      setError("Failed to load data. Please try again.");
     } finally {
       setLoading(false);
     }

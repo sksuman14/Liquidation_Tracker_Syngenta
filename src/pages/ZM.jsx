@@ -2,38 +2,47 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DataTable from "../components/DataTable";
+import { getSubordinateTAMobiles } from "../data/hierarchy";
 
 export default function ZM() {
   const [pending, setPending] = useState([]);      // Needs your approval
   const [approved, setApproved] = useState([]);    // Already approved by you
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const currentUser = localStorage.getItem("username") || "ZM User";
-  localStorage.setItem("userRole", "ZM");
-  const currentRole = "ZM";
+ const currentUser = localStorage.getItem("userName") || "AM";
+  const currentRole = localStorage.getItem("userRole") || "AM";
+  const userMobile = localStorage.getItem("userMobile");
 
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/completed");
-      if (!response.ok) throw new Error("Server error");
+      setError("");
 
-      const allRecords = await response.json();
+      const res = await fetch("/api/completed");
+      if (!res.ok) throw new Error("Server error");
 
-      // Split: Pending ZM vs Already approved by ZM
-    // Pending your approval (ZM approved, waiting for NSM)
-const pendingZM = allRecords.filter(record => record.status === "approved_by_am");
+      const allRecords = await res.json();
 
-// Already approved by YOU (NSM) — stay forever, even if fully_approved
-const approvedByYou = allRecords.filter(record => 
-  (record.approved_by || []).some(tag => tag.includes("(ZM)"))
-);
+      // HIERARCHY FILTER: Only show records from TAs under this AM
+      const allowedTAs = getSubordinateTAMobiles(userMobile, currentRole);
+      const myRecords = allRecords.filter(r =>
+        r.phone_number && allowedTAs.includes(r.phone_number)
+      );
 
-      setPending(pendingZM);
-      setApproved(approvedByYou);
+      // Pending AM approval → already approved by TSM
+      const pendingList = myRecords.filter(r => r.status === "approved_by_am");
+
+      // Already approved by THIS AM (stays forever)
+      const approvedByMe = myRecords.filter(r =>
+        (r.approved_by || []).some(tag => tag.includes("(ZM)"))
+      );
+
+      setPending(pendingList);
+      setApproved(approvedByMe);
     } catch (err) {
       console.error("ZM fetch error:", err);
-      alert("Failed to load ZM dashboard");
+      setError("Failed to load AM dashboard. Please try again.");
     } finally {
       setLoading(false);
     }

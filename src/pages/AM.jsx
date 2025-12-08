@@ -2,38 +2,47 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DataTable from "../components/DataTable";
+import { getSubordinateTAMobiles } from "../data/hierarchy";
 
 export default function AM() {
   const [pending, setPending] = useState([]);      // Needs your approval
   const [approved, setApproved] = useState([]);    // Already approved by you
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const currentUser = localStorage.getItem("username") || "AM User";
-  localStorage.setItem("userRole", "AM");
-  const currentRole = "AM";
+ const currentUser = localStorage.getItem("userName");
+  const currentRole = localStorage.getItem("userRole") || "AM";
+  const userMobile = localStorage.getItem("userMobile");
 
-  const fetchRequests = async () => {
+ const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/completed");
-      if (!response.ok) throw new Error("Server error");
+      setError("");
 
-      const allRecords = await response.json();
+      const res = await fetch("/api/completed");
+      if (!res.ok) throw new Error("Server error");
 
-      // Split: Pending AM vs Already approved by AM
-    // Pending your approval (ZM approved, waiting for NSM)
-const pendingAM = allRecords.filter(record => record.status === "approved_by_tsm");
+      const allRecords = await res.json();
 
-// Already approved by YOU (NSM) — stay forever, even if fully_approved
-const approvedByYou = allRecords.filter(record => 
-  (record.approved_by || []).some(tag => tag.includes("(AM)"))
-);
+      // HIERARCHY FILTER: Only show records from TAs under this AM
+      const allowedTAs = getSubordinateTAMobiles(userMobile, currentRole);
+      const myRecords = allRecords.filter(r =>
+        r.phone_number && allowedTAs.includes(r.phone_number)
+      );
 
-      setPending(pendingAM);
-      setApproved(approvedByYou);
+      // Pending AM approval → already approved by TSM
+      const pendingList = myRecords.filter(r => r.status === "approved_by_tsm");
+
+      // Already approved by THIS AM (stays forever)
+      const approvedByMe = myRecords.filter(r =>
+        (r.approved_by || []).some(tag => tag.includes("(AM)"))
+      );
+
+      setPending(pendingList);
+      setApproved(approvedByMe);
     } catch (err) {
       console.error("AM fetch error:", err);
-      alert("Failed to load AM dashboard");
+      setError("Failed to load AM dashboard. Please try again.");
     } finally {
       setLoading(false);
     }

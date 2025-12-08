@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import DataTable from "../components/DataTable";
+import { getSubordinateTAMobiles } from "../data/hierarchy"; // Import helper
 
 export default function ApprovalDashboard() {
   const [records, setRecords] = useState([]);
@@ -18,6 +19,7 @@ export default function ApprovalDashboard() {
 
   const currentRole = localStorage.getItem("userRole") || "TA";
   const currentUser = localStorage.getItem("username") || "User";
+  const userMobile = localStorage.getItem("userMobile"); // For filtering
 
   const roleOrder = { TSM: 1, AM: 2, ZM: 3, NSM: 4, CM: 5 };
 const currentLevel = roleOrder[currentRole] || 0;
@@ -35,6 +37,11 @@ const currentLevel = roleOrder[currentRole] || 0;
     try {
       const res = await fetch("/api/completed");
       const data = await res.json();
+      // HIERARCHY FILTERING
+      const allowedTAMobiles = getSubordinateTAMobiles(userMobile, currentRole);
+      const filtered = allData.filter(record =>
+        allowedTAMobiles.includes(record.phone_number.slice(2)) // "91" + mobile
+      );
       setRecords(data);
     } catch (err) {
       console.error("Fetch error:", err);
