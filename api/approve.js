@@ -1,5 +1,4 @@
-// api/approve.js  ← POST /api/approve
-
+// api/approve.js → FINAL & WORKING VERSION
 require("dotenv").config();
 const { Pool } = require("pg");
 
@@ -15,7 +14,10 @@ export default async function handler(req, res) {
 
   const { phone_number, record_date, role, user } = req.body;
 
-  // Only these roles can approve now
+  if (!phone_number || !record_date || !role || !user) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
   if (!["TSM", "AM", "ZM", "NSM"].includes(role)) {
     return res.status(400).json({ error: "Invalid role" });
   }
@@ -45,7 +47,7 @@ export default async function handler(req, res) {
     ];
 
     const currentIndex = statusFlow.indexOf(currentStatus);
-    if (currentIndex === -1 || currentIndex >= 5) {  // 5 = last step before fully_approved
+    if (currentIndex === -1 || currentIndex >= 5) {
       return res.status(400).json({ error: "Invalid status or already fully approved" });
     }
 
@@ -57,33 +59,33 @@ export default async function handler(req, res) {
     };
 
     const nextExpectedStatus = statusFlow[currentIndex + 1];
-
-    // Special case: NSM approval → directly to fully_approved
     const finalStatus = role === "NSM" ? "fully_approved" : roleToStatus[role];
 
     if (finalStatus !== nextExpectedStatus && role !== "NSM") {
-      return res.status(400).json({ error: "Not your turn!" });
+      return res.status(400).json({ error: "Not your turn to approve!" });
     }
 
     const approvalTag = `${user} (${role})`;
+
     if (approvedBy.includes(approvalTag)) {
       return res.status(400).json({ error: "You have already approved this record" });
     }
 
+    // CORRECTED QUERY — Only 4 parameters: $1=status, $2=tag, $3=phone, $4=date
     const result = await pool.query(`
       UPDATE complete_records 
       SET 
         status = $1,
         approved_by = array_append(approved_by, $2),
-      
         edited_at = NOW()
-      WHERE phone_number = $4 AND record_date = $5
+      WHERE phone_number = $3 
+        AND record_date = $4
       RETURNING *
-    `, [finalStatus, approvalTag, approvalTag, phone_number, record_date]);
+    `, [finalStatus, approvalTag, phone_number, record_date]);
 
     res.status(200).json({ success: true, record: result.rows[0] });
   } catch (err) {
     console.error("Approve error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Server error", details: err.message });
   }
 }
