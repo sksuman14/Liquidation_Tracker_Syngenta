@@ -17,7 +17,9 @@ const hierarchy = {
               { name: "Navudu Naveen kumar", mobile: "918528633452" },
               // Demo TAs from your screenshot
               { name: "Sejal Sharma", mobile: "917009622642" },
-              { name: "Pallavi K", mobile: "919334383571" }
+              { name: "Rani", mobile: "919915169793" },
+
+
             ]
           }
         ]
@@ -36,8 +38,8 @@ const hierarchy = {
               { name: "Chitra Madhu Sudhan", mobile: "8328404240" },
               { name: "Yaravagari Girisimha Reddy", mobile: "7799656653" },
               { name: "Chapirimatam Gurudeep", mobile: "7674994040" },
-              { name: "Yamini R", mobile: "918219359413" },
-              { name: "Harsh", mobile: "917017396521" }
+              { name: "Yamini", mobile: "918219359413" },
+
             ]
           }
         ]
@@ -51,7 +53,8 @@ const hierarchy = {
             email: "Vijay_Raj.Gnanasekaran@syngenta.com",
             tas: [
               { name: "Suresh Kumar Settu", mobile: "8072376133" },
-              { name: "Suman Kumar", mobile: "918124660891" }
+              { name: "Suman Kumar", mobile: "918124660891" },
+
             ]
           }
         ]
@@ -87,8 +90,9 @@ const hierarchy = {
               { name: "Abhishek B R", mobile: "7899661192" },
               { name: "Manoj H M", mobile: "9380076002" },
               { name: "Shashank G R", mobile: "855356182" },
-              { name: "Sejal Sharma", mobile: "917009622642" },
-              { name: "Pallavi K", mobile: "919334383571" }
+              { name: "Harsh", mobile: "917017396521" }
+
+
             ]
           }
         ]
@@ -124,7 +128,8 @@ const hierarchy = {
             tas: [
               { name: "Swapnil Pavhane", mobile: "8551905392" },
               { name: "Swanand Rajput", mobile: "8605943002" },
-              { name: "Sagar Bhalerao", mobile: "9604973887" }
+              { name: "Sagar Bhalerao", mobile: "9604973887" },
+              { name: "Pallavi K", mobile: "919334383571" }
             ]
           }
         ]
