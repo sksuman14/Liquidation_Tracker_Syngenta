@@ -1,4 +1,4 @@
-// api/approve.js → FINAL & 100% CORRECT (2025)
+// api/approve.js → FINAL & WORKING VERSION
 require("dotenv").config();
 const { Pool } = require("pg");
 
@@ -23,17 +23,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Use client for transaction safety
-    const client = await pool.connect();
-
-    const current = await client.query(
+    const current = await pool.query(
       `SELECT status, approved_by FROM complete_records 
        WHERE phone_number = $1 AND record_date = $2 LIMIT 1`,
       [phone_number, record_date]
     );
 
     if (current.rows.length === 0) {
-      client.release();
       return res.status(404).json({ error: "Record not found" });
     }
 
@@ -52,7 +48,6 @@ export default async function handler(req, res) {
 
     const currentIndex = statusFlow.indexOf(currentStatus);
     if (currentIndex === -1 || currentIndex >= 5) {
-      client.release();
       return res.status(400).json({ error: "Invalid status or already fully approved" });
     }
 
@@ -63,25 +58,21 @@ export default async function handler(req, res) {
       NSM: "approved_by_nsm"
     };
 
-    // CRITICAL FIX: NSM approval goes directly to fully_approved
-    const nextStatus = role === "NSM" ? "fully_approved" : roleToStatus[role];
+    const nextExpectedStatus = statusFlow[currentIndex + 1];
+    const finalStatus = role === "NSM" ? "fully_approved" : roleToStatus[role];
 
-    // Check if it's the correct person's turn
-    const expectedNextStatus = statusFlow[currentIndex + 1];
-    if (nextStatus !== expectedNextStatus && role !== "NSM") {
-      client.release();
+    if (finalStatus !== nextExpectedStatus && role !== "NSM") {
       return res.status(400).json({ error: "Not your turn to approve!" });
     }
 
     const approvalTag = `${user} (${role})`;
 
     if (approvedBy.includes(approvalTag)) {
-      client.release();
       return res.status(400).json({ error: "You have already approved this record" });
     }
 
-    // FINAL CORRECTED QUERY — 4 parameters only
-    const result = await client.query(`
+    // CORRECTED QUERY — Only 4 parameters: $1=status, $2=tag, $3=phone, $4=date
+    const result = await pool.query(`
       UPDATE complete_records 
       SET 
         status = $1,
@@ -90,9 +81,7 @@ export default async function handler(req, res) {
       WHERE phone_number = $3 
         AND record_date = $4
       RETURNING *
-    `, [nextStatus, approvalTag, phone_number, record_date]);
-
-    client.release();
+    `, [finalStatus, approvalTag, phone_number, record_date]);
 
     res.status(200).json({ success: true, record: result.rows[0] });
   } catch (err) {
