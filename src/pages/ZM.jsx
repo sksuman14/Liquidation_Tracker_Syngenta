@@ -132,7 +132,10 @@ export default function ZM() {
   }, []);
 
   const getStatusBadge = (status) => {
-    if (status === "approved_by_zm") {
+    if (
+      (status.startsWith("approved_by_") && status !== "approved_by_tsm") ||
+      status === "fully_approved"
+    ) {
       return (
         <span style={{
           background: "#10b981",
@@ -148,14 +151,13 @@ export default function ZM() {
     }
     return (
       <span style={{
-        background: "#7c3aed",
+        background: "#ea580c",
         color: "white",
         padding: "10px 22px",
         borderRadius: 40,
         fontWeight: "bold",
         fontSize: 13,
-        boxShadow: "0 8px 25px rgba(124,58,237,0.4)",
-        letterSpacing: "0.5px"
+        boxShadow: "0 6px 20px rgba(234,88,12,0.3)"
       }}>
         PENDING YOUR APPROVAL
       </span>

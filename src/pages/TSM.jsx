@@ -130,34 +130,34 @@ export default function TSM() {
   }, []);
 
   const getStatusBadge = (status) => {
-    if (status === "approved_by_tsm") {
-      return (
-        <span style={{
-          background: "#10b981",
-          color: "white",
-          padding: "10px 22px",
-          borderRadius: 40,
-          fontWeight: "bold",
-          fontSize: 13,
-        }}>
-          APPROVED BY YOU
-        </span>
-      );
-    }
+  if (status.startsWith("approved_by_") || status === "fully_approved") {
     return (
       <span style={{
-        background: "#f59e0b",
+        background: "#10b981",
         color: "white",
         padding: "10px 22px",
         borderRadius: 40,
         fontWeight: "bold",
         fontSize: 13,
-        boxShadow: "0 6px 20px rgba(245,158,11,0.3)"
       }}>
-        PENDING YOUR APPROVAL
+        APPROVED BY YOU
       </span>
     );
-  };
+  }
+  return (
+    <span style={{
+      background: "#f59e0b",
+      color: "white",
+      padding: "10px 22px",
+      borderRadius: 40,
+      fontWeight: "bold",
+      fontSize: 13,
+      boxShadow: "0 6px 20px rgba(245,158,11,0.3)"
+    }}>
+      PENDING YOUR APPROVAL
+    </span>
+  );
+};
 
   return (
     <DashboardLayout title="TSM - Territory Sales Manager Dashboard">

@@ -132,7 +132,10 @@ export default function AM() {
   }, []);
 
   const getStatusBadge = (status) => {
-    if (status === "approved_by_am") {
+    if (
+      (status.startsWith("approved_by_") && status !== "approved_by_tsm") ||
+      status === "fully_approved"
+    ) {
       return (
         <span style={{
           background: "#10b981",
@@ -444,3 +447,4 @@ export default function AM() {
     </DashboardLayout>
   );
 }
+
