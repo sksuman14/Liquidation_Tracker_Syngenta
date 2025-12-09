@@ -16,7 +16,7 @@ const hierarchy = {
               { name: "Panyam Venkata Raghunath Reddy", mobile: "918790331193" },
               { name: "Navudu Naveen kumar", mobile: "918528633452" },
               // Demo TAs from your screenshot
-              { name: "Sejal Sharma", mobile: "917009622642" },
+            
               { name: "Rani", mobile: "919915169793" },
 
 
@@ -129,7 +129,8 @@ const hierarchy = {
               { name: "Swapnil Pavhane", mobile: "8551905392" },
               { name: "Swanand Rajput", mobile: "8605943002" },
               { name: "Sagar Bhalerao", mobile: "9604973887" },
-              { name: "Pallavi K", mobile: "919334383571" }
+              { name: "Pallavi K", mobile: "919334383571" },
+               { name: "Sejal Sharma", mobile: "917009622642" },
             ]
           }
         ]
