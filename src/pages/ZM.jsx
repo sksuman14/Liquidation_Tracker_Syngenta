@@ -133,7 +133,7 @@ export default function ZM() {
 
   const getStatusBadge = (status) => {
     if (
-      (status.startsWith("approved_by_") && status !== "approved_by_tsm") ||
+      (status.startsWith("approved_by_") && status !== "approved_by_am") ||
       status === "fully_approved"
     ) {
       return (
