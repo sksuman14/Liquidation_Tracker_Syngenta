@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     const result = await pool.query(`
       SELECT phone_number, employee_name, hq, zone, area,
              products, created_at, status, edited_by, edited_at, record_date, approved_by
-      FROM complete_records 
+      FROM liquidation_records 
       ORDER BY record_date DESC, created_at DESC
     `);
 
