@@ -1,450 +1,447 @@
-// src/pages/AM.jsx → FINAL 2025: Pending on Top + Approved at Bottom (Never Disappears)
+// src/pages/AM.jsx → FINAL 2025: Single Product Table + Rich TSM Cards
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
-import DataTable from "../components/DataTable";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { getSubordinateTAMobiles } from "../data/hierarchy";
+import { downloadCSV } from "../utils/downloadCSV";
+
+const COLORS = ["#ea580c", "#f97316", "#fb923c", "#dc2626", "#7c3aed", "#166534"];
 
 export default function AM() {
-  const [pending, setPending] = useState([]);      // Needs your approval
-  const [approved, setApproved] = useState([]);    // Already approved by you
+  const [allRecords, setAllRecords] = useState([]);
+  const [selectedTSM, setSelectedTSM] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
- const currentUser = localStorage.getItem("userName");
-  const currentRole = localStorage.getItem("userRole") || "AM";
+  const currentUser = localStorage.getItem("userName") || "Area Manager";
   const userMobile = localStorage.getItem("userMobile");
 
- const fetchRequests = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      setError("");
-
       const res = await fetch("/api/completed");
-      if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
 
-      const allRecords = await res.json();
-
-      // HIERARCHY FILTER: Only show records from TAs under this AM
-      const allowedTAs = getSubordinateTAMobiles(userMobile, currentRole);
-      const myRecords = allRecords.filter(r =>
+      const allowedTAs = getSubordinateTAMobiles(userMobile, "AM");
+      const myRecords = data.filter(r =>
         r.phone_number && allowedTAs.includes(r.phone_number)
       );
 
-      // Pending AM approval → already approved by TSM
-      const pendingList = myRecords.filter(r => r.status === "approved_by_tsm");
-
-      // Already approved by THIS AM (stays forever)
-      const approvedByMe = myRecords.filter(r =>
-        (r.approved_by || []).some(tag => tag.includes("(AM)"))
-      );
-
-      setPending(pendingList);
-      setApproved(approvedByMe);
+      setAllRecords(myRecords);
     } catch (err) {
-      console.error("AM fetch error:", err);
-      setError("Failed to load AM dashboard. Please try again.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = async (record) => {
-    if (!window.confirm("Approve this record as Area Manager (AM)?\nIt will be sent to ZM.")) return;
-
-    try {
-      const res = await fetch("/api/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone_number: record.phone_number,
-          record_date: record.record_date,
-          role: "AM",
-          user: currentUser
-        })
-      });
-
-      const result = await res.json();
-      if (result.success) {
-        alert("Approved by AM! Record sent to ZM");
-        fetchRequests();
-      } else {
-        alert("Error: " + (result.error || "Approval failed"));
-      }
-    } catch (err) {
-      alert("Network error");
-    }
-  };
-
-  // EDIT MODAL — FULLY POWERFUL & CONSISTENT
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [editForm, setEditForm] = useState({
-    employee_name: "", hq: "", zone: "", area: "", products: []
-  });
-
-  const openEditModal = (record) => {
-    setEditingRecord(record);
-    setEditForm({
-      employee_name: record.employee_name || "",
-      hq: record.hq || "",
-      zone: record.zone || "",
-      area: record.area || "",
-      products: JSON.parse(JSON.stringify(record.products || []))
-    });
-  };
-
-  const saveEdit = async () => {
-    if (!editingRecord) return;
-
-    try {
-      const res = await fetch("/api/edit", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone_number: editingRecord.phone_number,
-          record_date: editingRecord.record_date,
-          role: currentRole,
-          username: currentUser,
-          employee_name: editForm.employee_name,
-          hq: editForm.hq,
-          zone: editForm.zone,
-          area: editForm.area,
-          products: editForm.products
-        })
-      });
-
-      const result = await res.json();
-      if (result.success) {
-        alert("Record updated successfully!");
-        setEditingRecord(null);
-        fetchRequests();
-      } else {
-        alert("Edit failed: " + result.error);
-      }
-    } catch (err) {
-      alert("Save failed");
-    }
-  };
-
   useEffect(() => {
-    fetchRequests();
-    const interval = setInterval(fetchRequests, 60000);
+    fetchData();
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const getStatusBadge = (status) => {
-    if (
-      (status.startsWith("approved_by_") && status !== "approved_by_tsm") ||
-      status === "fully_approved"
-    ) {
-      return (
-        <span style={{
-          background: "#10b981",
-          color: "white",
-          padding: "10px 22px",
-          borderRadius: 40,
-          fontWeight: "bold",
-          fontSize: 13,
-        }}>
-          APPROVED BY YOU
-        </span>
-      );
+ const getTSMStats = () => {
+  const recordsOnDate = allRecords.filter(r => r.record_date === selectedDate);
+
+  const tsmMap = new Map();
+  const productMap = new Map(); // Uses composite key: sku + productName
+
+  recordsOnDate.forEach(r => {
+    const key = r.phone_number;
+
+    // TSM Stats
+    if (!tsmMap.has(key)) {
+      tsmMap.set(key, {
+        name: r.employee_name || "Unknown",
+        mobile: r.phone_number,
+        area: r.area || "N/A",
+        zone: r.zone || "N/A",
+        totalLiq: 0
+      });
     }
-    return (
-      <span style={{
-        background: "#ea580c",
-        color: "white",
-        padding: "10px 22px",
-        borderRadius: 40,
-        fontWeight: "bold",
-        fontSize: 13,
-        boxShadow: "0 6px 20px rgba(234,88,12,0.3)"
-      }}>
-        PENDING YOUR APPROVAL
-      </span>
+    const perf = tsmMap.get(key);
+    perf.totalLiq += (r.products || []).reduce(
+      (sum, p) => sum + (p.liquidationQty || p.liquidation_qty || 0),
+      0
     );
+
+  
+    (r.products || []).forEach(p => {
+      const sku = p.sku || "unknown";
+      const name = p.productName || p.product_name || "Unknown";
+      const uniqueKey = `${sku}___${name}`; // 100% safe unique identifier
+
+      if (!productMap.has(uniqueKey)) {
+        productMap.set(uniqueKey, {
+          sku,
+          name,
+          family: p.family || "Others",
+          opening: 0,
+          liquidated: 0
+        });
+      }
+
+      const prod = productMap.get(uniqueKey);
+      prod.opening += p.openingStock || p.opening_qty || 0;
+      prod.liquidated += p.liquidationQty || p.liquidation_qty || 0;
+    });
+  });
+
+  const productList = Array.from(productMap.values())
+    .map(p => ({
+      ...p,
+      remaining: p.opening - p.liquidated
+    }))
+    .sort((a, b) => b.liquidated - a.liquidated);
+
+  return {
+    tsmList: Array.from(tsmMap.values()).sort((a, b) => b.totalLiq - a.totalLiq),
+    productList
+  };
+};
+
+  const { tsmList, productList } = getTSMStats();
+  const areaTotal = tsmList.reduce((sum, t) => sum + t.totalLiq, 0);
+
+  const getGroupedProducts = () => {
+    if (!selectedTSM) return [];
+    const records = allRecords.filter(r => r.phone_number === selectedTSM.mobile && r.record_date === selectedDate);
+    const grouped = {};
+
+    records.forEach(r => {
+      (r.products || []).forEach(p => {
+        const family = p.family || "Others";
+        if (!grouped[family]) grouped[family] = { family, totalOpening: 0, totalLiquidated: 0, items: [] };
+        grouped[family].totalOpening += p.openingStock || p.opening_qty || 0;
+        grouped[family].totalLiquidated += p.liquidationQty || p.liquidation_qty || 0;
+        grouped[family].items.push({
+          name: p.productName || p.product_name || "Unknown",
+          sku: p.sku || "",
+          opening: p.openingStock || p.opening_qty || 0,
+          liquidated: p.liquidationQty || p.liquidation_qty || 0
+        });
+      });
+    });
+    return Object.values(grouped);
   };
 
+  const groupedProducts = getGroupedProducts();
+  const pieData = groupedProducts.map(g => ({ name: g.family, value: g.totalLiquidated })).filter(x => x.value > 0);
+  const barData = groupedProducts.map(g => ({ name: g.family, opening: g.totalOpening, liquidated: g.totalLiquidated }));
+
   return (
-    <DashboardLayout title="AM - Area Manager Dashboard">
-      <div style={{ }}>
+    <DashboardLayout>
+      <div style={{ padding: "0px 0px", maxWidth: "1600px"}}>
 
-        {/* PENDING APPROVAL SECTION */}
-        <section style={{ marginBottom: 60 }}>
-          <h2 style={{ color: "#ea580c", fontSize: 24, marginBottom: 16 }}>
-            Pending Your Approval ({pending.length})
-          </h2>
-          <p style={{ color: "#666", marginBottom: 24, fontSize: 15 }}>
-            <strong>{currentUser}</strong> — Review records approved by TSM
-          </p>
-
-          {loading && (
-            <div style={{ textAlign: "center", padding: 100, color: "#94a3b8" }}>
-              Loading pending records...
-            </div>
-          )}
-
-          {!loading && pending.length === 0 && (
-            <div style={{
-              textAlign: "center",
-              padding: 130,
-              background: "#fff7ed",
-              borderRadius: 24,
-              color: "#c2410c",
-              fontSize: 24,
-              fontWeight: "bold"
-            }}>
-              No records pending for your approval
-            </div>
-          )}
-
-          {!loading && pending.length > 0 && (
-            <DataTable
-              data={pending}
-              showActions={true}
-              onApprove={handleApprove}
-              onEdit={openEditModal}
-              canApprove={() => true}
-              canEdit={() => true}
-              currentRole="AM"
-              currentUser={currentUser}
-              getStatusBadge={getStatusBadge}
-            />
-          )}
-        </section>
-
-        {/* APPROVED BY YOU SECTION */}
-        {approved.length > 0 && (
-          <section>
-            <div style={{
-              borderTop: "3px solid #e2e8f0",
-              paddingTop: 10,
-              marginTop: 40
-            }}>
-              <h2 style={{ color: "#059669", fontSize: 24, marginBottom: 20 }}>
-                Approved by You → Sent to ZM ({approved.length})
-              </h2>
-              <p style={{ color: "#64748b", marginBottom: 24, fontSize: 15 }}>
-                These records have been approved by you and are now awaiting ZM approval.
-              </p>
-
-              <DataTable
-                data={approved}
-                showActions={false}
-                getStatusBadge={getStatusBadge}
-              />
-            </div>
-          </section>
-        )}
-
-        {/* GORGEOUS & FULLY ALIGNED EDIT MODAL */}
-        {editingRecord && (
-          <div style={{
-            position: "fixed", inset: 0,
-            background: "rgba(0,0,0,0.9)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 9999,
-            padding: 20
+        {/* HEADER */}
+        <div style={{ textAlign: "center"}}>
+          <h1 style={{
+            fontSize: 44,
+            background: "linear-gradient(90deg, #ea580c, #f97316, #fb923c)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontWeight: 900,
           }}>
-            <div style={{
-              background: "white",
-              borderRadius: 20,
-              width: "100%",
-              maxWidth: "1200px",
-              maxHeight: "92vh",
-              overflow: "auto",
-              padding: 40,
-              boxShadow: "0 30px 80px rgba(0,0,0,0.5)"
+            Area Manager Dashboard
+          </h1>
+          <p style={{ fontSize: 20, color: "#1e293b" }}>
+            Welcome, <strong style={{ color: "#ea580c" }}>{currentUser}</strong>
+          </p>
+        </div>
+
+        {/* DATE + CSV */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 20,
+          marginBottom: 50
+        }}>
+          <div>
+            <label style={{ fontWeight: "bold", fontSize: 18, marginRight: 12 }}>Date:</label>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={e => setSelectedDate(e.target.value)}
+              style={{
+                padding: 14,
+                borderRadius: 12,
+                border: "2px solid #fb923c",
+                background: "#fff7ed",
+                fontSize: 16
+              }}
+            />
+          </div>
+
+          <button
+            onClick={() => downloadCSV(
+              allRecords.filter(r => r.record_date === selectedDate),
+              selectedDate,
+              "AM_Area_Report"
+            )}
+            style={{
+              padding: "16px 36px",
+              background: "linear-gradient(135deg, #ea580c, #f97316)",
+              color: "white",
+              border: "none",
+              borderRadius: 16,
+              fontSize: 18,
+              fontWeight: "bold",
+              boxShadow: "0 12px 30px rgba(234,88,12,0.4)",
+              cursor: "pointer"
+            }}
+          >
+            Download CSV
+          </button>
+        </div>
+
+        
+
+        {/* TITLE */}
+        <h3 style={{ fontSize: 28, fontWeight: "bold", marginBottom: 30, color: "#1e293b" }}>
+          {selectedTSM ? `${selectedTSM.name}'s Performance` : "Your Team Members"}
+          {selectedTSM && (
+            <button onClick={() => setSelectedTSM(null)} style={{
+              marginLeft: 24, padding: "12px 32px", background: "#64748b", color: "white",
+              border: "none", borderRadius: 16, fontWeight: "bold"
             }}>
-              <h3 style={{ margin: "0 0 32px 0", fontSize: 28, color: "#1e293b" }}>
-                Edit Record → {editingRecord.phone_number}
-              </h3>
+              Back to Team
+            </button>
+          )}
+        </h3>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 32 }}>
-                <input
-                  placeholder="Employee Name"
-                  value={editForm.employee_name}
-                  onChange={e => setEditForm({ ...editForm, employee_name: e.target.value })}
-                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-                />
-                <input
-                  placeholder="HQ"
-                  value={editForm.hq}
-                  onChange={e => setEditForm({ ...editForm, hq: e.target.value })}
-                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-                />
-                <input
-                  placeholder="Zone"
-                  value={editForm.zone}
-                  onChange={e => setEditForm({ ...editForm, zone: e.target.value })}
-                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-                />
-                <input
-                  placeholder="Area"
-                  value={editForm.area}
-                  onChange={e => setEditForm({ ...editForm, area: e.target.value })}
-                  style={{ padding: 16, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 16 }}
-                />
-              </div>
+        {!selectedTSM ? (
+          <>
+            {/* RICH TSM CARDS */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))",
+              gap: 32,
+              marginBottom: 60
+            }}>
+              {tsmList.map((tsm, i) => (
+                <div
+                  key={tsm.mobile}
+                  onClick={() => setSelectedTSM(tsm)}
+                  style={{
+                    padding: 40,
+                    background: "white",
+                    borderRadius: 28,
+                    textAlign: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 15px 40px rgba(0,0,0,0.12)",
+                    transition: "all 0.4s",
+                    border: "3px solid #fed7aa",
+                    position: "relative"
+                  }}
+                >
+                  {i === 0 && (
+                    <div style={{
+                      position: "absolute",
+                      top: 12,
+                      right: 12,
+                      background: "#ea580c",
+                      color: "white",
+                      padding: "8px 16px",
+                      borderRadius: 20,
+                      fontSize: 14,
+                      fontWeight: "bold"
+                    }}>
+                      #1 PERFORMER
+                    </div>
+                  )}
 
-              <h4 style={{ margin: "28px 0 16px 0", color: "#ea580c" }}>Products</h4>
-              <div style={{ border: "1px solid #e2e8f0", borderRadius: 16, overflow: "hidden", marginBottom: 28 }}>
+                  <div style={{ fontSize: 26, fontWeight: "bold", marginBottom: 16, color: "#92400e" }}>
+                    {tsm.name}
+                  </div>
+                  <div style={{ fontSize: 18, color: "#64748b", marginBottom: 8 }}>
+                    Phone: <strong>{tsm.mobile}</strong>
+                  </div>
+                  <div style={{ fontSize: 18, color: "#64748b", marginBottom: 16 }}>
+                    Area: <strong>{tsm.area}</strong> • Zone: <strong>{tsm.zone}</strong>
+                  </div>
+                  <div style={{ fontSize: 64, fontWeight: "900", color: "#ea580c", margin: "20px 0" }}>
+                    {tsm.totalLiq.toLocaleString()}
+                  </div>
+                  <div style={{ color: "#64748b", fontSize: 18 }}>Liquidated</div>
+                </div>
+              ))}
+            </div>
+
+            {/* SINGLE PRODUCT TABLE */}
+            <h3 style={{ fontSize: 28, fontWeight: "bold", margin: "60px 0 30px", color: "#1e293b" }}>
+              Product-wise Summary (Area)
+            </h3>
+            <div style={{ background: "white", borderRadius: 20, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
+              <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead style={{ background: "#fed7aa" }}>
-                    <tr>
-                      <th style={{ padding: "18px", textAlign: "left" }}>Product Family</th>
-                      <th style={{ padding: "18px", textAlign: "left" }}>Product Name</th>
-                      <th style={{ padding: "18px", textAlign: "left" }}>SKU</th>
-                      <th style={{ padding: "18px", textAlign: "center" }}>Opening Stock</th>
-                      <th style={{ padding: "18px", textAlign: "center" }}>Liq. Qty</th>
-                      <th style={{ padding: "18px", textAlign: "center", width: 130 }}>Action</th>
+                  <thead>
+                    <tr style={{ background: "#ea580c", color: "white" }}>
+                      <th style={{ padding: "16px", textAlign: "left" }}>Product</th>
+                      <th style={{ padding: "16px", textAlign: "left" }}>SKU</th>
+                      <th style={{ padding: "16px", textAlign: "left" }}>Family</th>
+                      <th style={{ padding: "16px", textAlign: "center" }}>Opening</th>
+                      <th style={{ padding: "16px", textAlign: "center" }}>Liquidated</th>
+                      <th style={{ padding: "16px", textAlign: "center" }}>Remaining</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {editForm.products.map((p, i) => (
-                      <tr key={i} style={{ borderBottom: i !== editForm.products.length - 1 ? "1px solid #e2e8f0" : "none" }}>
-                        <td style={{ padding: "14px" }}>
-                          <input
-                            value={p.family || ""}
-                            onChange={e => {
-                              const np = [...editForm.products];
-                              np[i].family = e.target.value;
-                              setEditForm({ ...editForm, products: np });
-                            }}
-                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                          />
+                    {productList.map((prod, i) => (
+                      <tr key={prod.sku} style={{
+                        background: i % 2 === 0 ? "#fff7ed" : "white",
+                        borderBottom: "1px solid #fed7aa"
+                      }}>
+                        <td style={{ padding: "14px 16px", fontWeight: "600", color: "#1e293b" }}>
+                          {prod.name}
                         </td>
-                        <td style={{ padding: "14px" }}>
-                          <input
-                            value={p.productName || p.product_name || ""}
-                            onChange={e => {
-                              const np = [...editForm.products];
-                              np[i].productName = e.target.value;
-                              setEditForm({ ...editForm, products: np });
-                            }}
-                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                          />
+                        <td style={{ padding: "14px 16px", color: "#64748b" }}>{prod.sku}</td>
+                        <td style={{ padding: "14px 16px", color: "#64748b" }}>{prod.family}</td>
+                        <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: "bold", color: "#92400e" }}>
+                          {prod.opening.toLocaleString()}
                         </td>
-                        <td style={{ padding: "14px" }}>
-                          <input
-                            value={p.sku || ""}
-                            onChange={e => {
-                              const np = [...editForm.products];
-                              np[i].sku = e.target.value;
-                              setEditForm({ ...editForm, products: np });
-                            }}
-                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                          />
+                        <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: "bold", color: "#ea580c" }}>
+                          {prod.liquidated.toLocaleString()}
                         </td>
-                        <td style={{ padding: "14px" }}>
-                          <input
-                            type="number"
-                            value={p.openingStock || p.opening_qty || 0}
-                            onChange={e => {
-                              const np = [...editForm.products];
-                              np[i].openingStock = Number(e.target.value);
-                              setEditForm({ ...editForm, products: np });
-                            }}
-                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                          />
-                        </td>
-                        <td style={{ padding: "14px" }}>
-                          <input
-                            type="number"
-                            value={p.liquidationQty || p.liquidation_qty || 0}
-                            onChange={e => {
-                              const np = [...editForm.products];
-                              np[i].liquidationQty = Number(e.target.value);
-                              setEditForm({ ...editForm, products: np });
-                            }}
-                            style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #cbd5e1" }}
-                          />
-                        </td>
-                        <td style={{ padding: "14px", textAlign: "center" }}>
-                          <button
-                            onClick={() => setEditForm({
-                              ...editForm,
-                              products: editForm.products.filter((_, idx) => idx !== i)
-                            })}
-                            style={{
-                              background: "#dc2626",
-                              color: "white",
-                              border: "none",
-                              padding: "12px 20px",
-                              borderRadius: 10,
-                              fontWeight: "bold",
-                              cursor: "pointer"
-                            }}
-                          >
-                            Remove
-                          </button>
+                        <td style={{ padding: "14px 16px", textAlign: "center", fontWeight: "bold", color: prod.remaining > 0 ? "#dc2626" : "#16a34a" }}>
+                          {prod.remaining.toLocaleString()}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+            </div>
+          </>
+        ) : (
+          // DETAILED TSM VIEW (unchanged)
+          <div>
+            {/* PERSON INFO */}
+            <div style={{
+              background: "linear-gradient(135deg, #fff7ed, #fed7aa)",
+              padding: 28,
+              borderRadius: 20,
+              marginBottom: 30,
+              boxShadow: "0 10px 30px rgba(234,88,12,0.2)",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: 20,
+              textAlign: "center"
+            }}>
+              <div><div style={{ fontSize: 18, color: "#92400e" }}>Name</div><div style={{ fontSize: 28, fontWeight: "bold", color: "#ea580c" }}>{selectedTSM.name}</div></div>
+              <div><div style={{ fontSize: 18, color: "#92400e" }}>Phone</div><div style={{ fontSize: 24, fontWeight: "bold" }}>{selectedTSM.mobile}</div></div>
+              <div><div style={{ fontSize: 18, color: "#92400e" }}>Area</div><div style={{ fontSize: 24, fontWeight: "bold" }}>{selectedTSM.area}</div></div>
+              <div><div style={{ fontSize: 18, color: "#92400e" }}>Zone</div><div style={{ fontSize: 24, fontWeight: "bold" }}>{selectedTSM.zone}</div></div>
+            </div>
 
-              <button
-                onClick={() => setEditForm({
-                  ...editForm,
-                  products: [...editForm.products, {
-                    family: "",
-                    productName: "",
-                    sku: "",
-                    openingStock: 0,
-                    liquidationQty: 0
-                  }]
-                })}
-                style={{
-                  padding: "16px 32px",
-                  background: "#ea580c",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 14,
+            {/* CHARTS */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30, marginBottom: 40 }}>
+              <div style={{ background: "white", padding: 32, borderRadius: 24, boxShadow: "0 10px 30px rgba(0,0,0,0.1)", position: "relative" }}>
+                <h3 style={{ textAlign: "center", margin: "0 0 20px 0", fontWeight: "bold", color: "#1e293b", fontSize: 22 }}>
+                  Liquidation by Family
+                </h3>
+                {pieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={320}>
+                    <PieChart>
+                      <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label>
+                        {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip formatter={(v) => `${v.toLocaleString()}`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <div style={{ padding: 80, color: "#94a3b8", textAlign: "center", fontSize: 18 }}>No data</div>}
+
+                <div style={{
+                  position: "absolute",
+                  bottom: 24,
+                  right: 28,
+                  fontSize: 19,
                   fontWeight: "bold",
-                  fontSize: 16,
-                  marginBottom: 32,
-                  cursor: "pointer"
-                }}
-              >
-                + Add Product
-              </button>
+                  color: "#ea580c",
+                  background: "rgba(255, 247, 237, 0.9)",
+                  padding: "10px 20px",
+                  borderRadius: 16,
+                  border: "2px solid #fbbf24"
+                }}>
+                  Total: {selectedTSM.totalLiq.toLocaleString()}
+                </div>
+              </div>
 
-              <div style={{ textAlign: "right" }}>
-                <button
-                  onClick={saveEdit}
-                  style={{
-                    padding: "18px 44px",
-                    background: "#059669",
-                    color: "white",
-                    border: "none",
-                    borderRadius: 14,
-                    fontSize: 17,
-                    fontWeight: "bold",
-                    marginRight: 16
-                  }}
-                >
-                  Save Changes
-                </button>
-                <button
-                  onClick={() => setEditingRecord(null)}
-                  style={{
-                    padding: "18px 44px",
-                    background: "#64748b",
-                    color: "white",
-                    border: "none",
-                    borderRadius: 14,
-                    fontSize: 17
-                  }}
-                >
-                  Cancel
-                </button>
+              <div style={{ background: "white", padding: 32, borderRadius: 24, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
+                <h3 style={{ textAlign: "center", marginBottom: 20, fontWeight: "bold", fontSize: 22 }}>
+                  Opening vs Liquidated
+                </h3>
+                {barData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={380}>
+                    <BarChart data={barData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" angle={-20} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip formatter={(v) => `${v.toLocaleString()}`} />
+                      <Legend />
+                      <Bar dataKey="opening" fill="#94a3b8" name="Opening Stock" radius={[8, 8, 0, 0]} />
+                      <Bar dataKey="liquidated" fill="#ea580c" name="Liquidated Stock" radius={[8, 8, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <div style={{ padding: 80, color: "#94a3b8", textAlign: "center", fontSize: 18 }}>No data</div>}
               </div>
             </div>
+
+            {/* GROUPED PRODUCTS */}
+            <h3 style={{ fontSize: 24, fontWeight: "bold", margin: "40px 0 24px" }}>
+              Product Details by Family
+            </h3>
+            <div style={{ display: "grid", gap: 24 }}>
+              {groupedProducts.map((group, i) => (
+                <div key={i} style={{
+                  background: "white",
+                  borderRadius: 16,
+                  padding: 24,
+                  boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+                  borderLeft: `6px solid ${COLORS[i % COLORS.length]}`
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <h4 style={{ fontSize: 22, fontWeight: "bold", margin: 0, color: "#1e293b" }}>
+                      {group.family}
+                    </h4>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 18, color: "#64748b" }}>Opening: <strong>{group.totalOpening}</strong></div>
+                      <div style={{ fontSize: 20, fontWeight: "bold", color: "#ea580c" }}>
+                        Liquidated: {group.totalLiquidated}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                    {group.items.map((item, j) => (
+                      <div key={j} style={{
+                        padding: 16,
+                        background: "#f8fafc",
+                        borderRadius: 12,
+                        border: "1px solid #e2e8f0"
+                      }}>
+                        <div><strong>{item.name}</strong> ({item.sku})</div>
+                        <div style={{ marginTop: 8, fontSize: 14, color: "#64748b" }}>
+                          Opening: {item.opening} → Liquidated: <strong style={{ color: "#ea580c" }}>{item.liquidated}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <div style={{ textAlign: "center", padding: 120, color: "#94a3b8", fontSize: 22 }}>
+            Loading your team data...
           </div>
         )}
       </div>
     </DashboardLayout>
   );
 }
-
